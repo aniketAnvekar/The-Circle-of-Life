@@ -25,7 +25,8 @@ def getShortestDistancesToGoals(graph, start, goals):
 			for neighbor in graph[cur]:
 				if neighbor not in visited:
 					queue.put(neighbor)
-					lengths[neighbor] = lengths[cur] + 1
+					if neighbor not in lengths.keys():
+						lengths[neighbor] = lengths[cur] + 1
 
 		visited.add(cur)
 
@@ -47,13 +48,16 @@ def shortestPathToGoal(graph, start, goal):
 			break
 		# print("Checked if is goal...")
 		if cur not in visited:
-			shuffle(graph[cur])
+			# print("Before: " + str(graph[cur]))
+			# graph[cur].sort(key=actually_visited.get)
+			# print("After: " + str(graph[cur]))
 			for neighbor in graph[cur]:
 				# print("Cur's neighbors: ", cur, graph[cur])
 				if neighbor not in visited:
 					# print("Adding neighbor...")
 					queue.put(neighbor)
-					paths[neighbor] = cur
+					if neighbor not in paths.keys():
+						paths[neighbor] = cur
 					# print("Adding neighbor: ", neighbor, cur)
 
 		visited.add(cur)

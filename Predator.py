@@ -22,7 +22,7 @@ class Predator:
         # print(self.path, self.position)
         self.position = self.path.pop()
         self.last_agent_pos = agent_pos
-        
+
         return -1 if self.position == agent_pos else 0
             
 
