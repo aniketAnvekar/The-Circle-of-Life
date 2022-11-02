@@ -46,7 +46,6 @@ class Agent3:
 
 		#survey a node
 		max_prob = max(self.q)
-		lst = [i for i in self.graph.keys() if self.q[i] == max_prob]
 		survey_spot = choice([i for i in self.graph.keys() if self.q[i] == max_prob])
 		# print("Survey Spot: " + str(survey_spot))
 		if survey_spot == prey.position:
