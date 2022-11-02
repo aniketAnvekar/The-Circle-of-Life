@@ -1,5 +1,5 @@
 import MapUtils as mp
-from random import sample 
+from random import choice 
 
 class Agent1:
 	def __init__(self, graph, start, config):
@@ -51,17 +51,17 @@ class Agent1:
 
 
 		if len(closer_to_prey_and_further_from_pred) != 0:
-			self.position = sample(closer_to_prey_and_further_from_pred, 1)[0]
+			self.position = choice(list(closer_to_prey_and_further_from_pred))
 		elif len(closer_to_prey_and_same_from_pred) != 0:
-			self.position = sample(closer_to_prey_and_same_from_pred, 1)[0]
+			self.position = choice(list(closer_to_prey_and_same_from_pred))
 		elif len(same_to_prey_and_further_from_pred) != 0:
-			self.position = sample(same_to_prey_and_further_from_pred, 1)[0]
+			self.position = choice(list(same_to_prey_and_further_from_pred))
 		elif len(same_to_prey_and_same_from_pred) != 0:
-			self.position = sample(same_to_prey_and_same_from_pred, 1)[0]
+			self.position = choice(list(same_to_prey_and_same_from_pred))
 		elif len(far_from_pred) != 0:
-			self.position = sample(far_from_pred, 1)[0]
+			self.position = choice(list(far_from_pred))
 		elif len(same_to_pred) != 0:
-			self.position = sample(same_to_pred, 1)[0]
+			self.position = choice(list(same_to_pred))
     	
 		return 1 if self.position == prey.position else -1 if self.position == predator.position else 0
 
