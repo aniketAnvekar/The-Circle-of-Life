@@ -5,6 +5,7 @@ import Predator as PREDATOR
 import json
 import random
 import Agent1 as AGENT1
+import Agent3 as AGENT3
 
 def load_config():
 	with open("./config.json", "r") as f:
@@ -90,7 +91,7 @@ def trials():
 	deaths = 0
 	success = 0
 	for i in range(config["NUMBER_OF_TRIALS"]):
-		if i % 10 == 0:
+		if i % 50 == 0:
 			print("TRIAL " + str(i))
 		breakFlag = False
 		status = 0

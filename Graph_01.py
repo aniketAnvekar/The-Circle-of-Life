@@ -24,25 +24,6 @@ class Graph:
         # print(self.alist)
         return self.alist
 
-    # def getElement(self, arr):
-    #     n = len(arr)
-    #     i = 0
-    #     while i<n:
-    #         print(arr)
-    #         rand_idx = random.randrange(len(arr))
-
-    #         rand_no = arr[rand_idx]
-
-    #         # print(rand_no)
-
-    #         if(len(self.alist[rand_no])<3):
-    #             return rand_no
-
-    #         arr.remove(rand_no)
-    #         i += 1
-    #     return -1
-
-
     def create_additionalEdges(self):
 
         i = self.nodes
@@ -74,8 +55,6 @@ class Graph:
                 finished_nodes = finished_nodes + 1 if status[i] else finished_nodes
 
         return self.alist
-
-
 
     def create_edges(self):
         edges = []
