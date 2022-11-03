@@ -64,4 +64,3 @@ class Agent1:
 			self.position = choice(list(same_to_pred))
     	
 		return 1 if self.position == prey.position else -1 if self.position == predator.position else 0
-

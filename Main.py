@@ -28,7 +28,7 @@ def init():
 	
 	#setting up players
 	agent_start = random.randrange(0, config["GRAPH_SIZE"])
-	agent = AGENT3.Agent3(graph.alist, agent_start, config)
+	agent = AGENT1.Agent1(graph.alist, agent_start, config)
 	predator = PREDATOR.Predator(graph.alist, config, agent_start)
 	prey = PREY.Prey(graph.alist, config, agent_start)
 
@@ -50,6 +50,7 @@ def update(frame, canvas, config, networkx_graph, fig, axis, node_positions, xli
 	elif status == -1:
 		print("Predator Win...")
 		return 
+
 	status = prey.update(agent.position)
 	if status == 1:
 		print("Agent Win...")
@@ -83,7 +84,7 @@ def trials():
 	graph = gr.Graph(config["GRAPH_SIZE"], config)
 	graph.create()
 	agent_start = random.randrange(0, config["GRAPH_SIZE"])
-	agent = AGENT3.Agent3(graph.alist, agent_start, config)
+	agent = AGENT1.Agent1(graph.alist, agent_start, config)
 	predator = PREDATOR.Predator(graph.alist, config, agent_start)
 	prey = PREY.Prey(graph.alist, config, agent_start)
 	timeouts = 0
@@ -119,7 +120,7 @@ def trials():
 		graph = gr.Graph(config["GRAPH_SIZE"], config)
 		graph.create()
 		agent_start = random.randrange(0, config["GRAPH_SIZE"])
-		agent = AGENT3.Agent3(graph.alist, agent_start, config)
+		agent = AGENT1.Agent1(graph.alist, agent_start, config)
 		predator = PREDATOR.Predator(graph.alist, config, agent_start)
 		prey = PREY.Prey(graph.alist, config, agent_start)
 

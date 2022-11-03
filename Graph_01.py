@@ -56,8 +56,6 @@ class Graph:
 
         return self.alist
 
-
-
     def create_edges(self):
         edges = []
         for k,v in self.alist.items():
