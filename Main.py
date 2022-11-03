@@ -5,7 +5,9 @@ import Predator as PREDATOR
 import json
 import random
 import Agent1 as AGENT1
+import Agent3 as AGENT3
 import Agent5 as AGENT5
+
 
 def load_config():
 	with open("./config.json", "r") as f:
@@ -28,7 +30,7 @@ def init():
 	
 	#setting up players
 	agent_start = random.randrange(0, config["GRAPH_SIZE"])
-	agent = AGENT5.Agent5(graph.alist, agent_start, config)
+	agent = AGENT1.Agent1(graph.alist, agent_start, config)
 	predator = PREDATOR.Predator(graph.alist, config, agent_start)
 	prey = PREY.Prey(graph.alist, config, agent_start)
 
@@ -84,14 +86,14 @@ def trials():
 	graph = gr.Graph(config["GRAPH_SIZE"], config)
 	graph.create()
 	agent_start = random.randrange(0, config["GRAPH_SIZE"])
-	agent = AGENT5.Agent5(graph.alist, agent_start, config)
+	agent = AGENT1.Agent1(graph.alist, agent_start, config)
 	predator = PREDATOR.Predator(graph.alist, config, agent_start)
 	prey = PREY.Prey(graph.alist, config, agent_start)
 	timeouts = 0
 	deaths = 0
 	success = 0
 	for i in range(config["NUMBER_OF_TRIALS"]):
-		if i % 10 == 0:
+		if i % 50 == 0:
 			print("TRIAL " + str(i))
 		breakFlag = False
 		status = 0
@@ -120,7 +122,7 @@ def trials():
 		graph = gr.Graph(config["GRAPH_SIZE"], config)
 		graph.create()
 		agent_start = random.randrange(0, config["GRAPH_SIZE"])
-		agent = AGENT5.Agent5(graph.alist, agent_start, config)
+		agent = AGENT1.Agent1(graph.alist, agent_start, config)
 		predator = PREDATOR.Predator(graph.alist, config, agent_start)
 		prey = PREY.Prey(graph.alist, config, agent_start)
 
