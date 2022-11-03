@@ -6,6 +6,8 @@ import json
 import random
 import Agent1 as AGENT1
 import Agent3 as AGENT3
+import Agent5 as AGENT5
+
 
 def load_config():
 	with open("./config.json", "r") as f:
