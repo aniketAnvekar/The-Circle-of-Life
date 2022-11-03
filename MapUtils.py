@@ -79,4 +79,20 @@ def mapToStack(paths, goal, start):
 
 	return stack
 
+def shortest_distances_to_goal(graph, visited, cur, goal, shortest_distances):
+	if cur == goal:
+		shortest_distances[cur] = 0
+		return
+	visited.add(cur)
+	shortest_distances[cur] = len(graph.keys()) + 1
+	for neighbor in graph[cur]:
+		if neighbor not in visited:
+			print("Checking neighbor " + str(neighbor) + " of " + str(cur))
+			shortest_distances_to_goal(graph, visited, neighbor, goal, shortest_distances)
+		shortest_distances[cur] = min(shortest_distances[cur], shortest_distances[neighbor] + 1)
+	if shortest_distances[cur] == 26:
+		print("Invalid distance: " + str(cur))
+		for neighbor in graph[cur]:
+			print(neighbor, shortest_distances[neighbor])
+
 
