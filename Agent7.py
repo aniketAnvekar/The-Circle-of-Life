@@ -31,15 +31,15 @@ class Agent7:
 		self.checkProbSum(sum(self.prey_q))
 		self.checkProbSum(sum(self.predator_q))
 
-		if not self.found_predator: # agent does not know where the predator starts 
-			# initialization
-			self.predator_q = [1/(self.config["GRAPH_SIZE"] - 1) for i in range(self.config["GRAPH_SIZE"])]
-			self.predator_q[self.position] = 0
-		# if not self.found_predator: # agent does know where the predator starts
-		# 	# print("Running initialization...")
-		# 	self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])]
-		# 	self.predator_q[predator.position] = 1
-		# 	self.found_predator = True
+		# if not self.found_predator: # agent does not know where the predator starts 
+		# 	# initialization
+		# 	self.predator_q = [1/(self.config["GRAPH_SIZE"] - 1) for i in range(self.config["GRAPH_SIZE"])]
+		# 	self.predator_q[self.position] = 0
+		if not self.found_predator: # agent does know where the predator starts
+			# print("Running initialization...")
+			self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])]
+			self.predator_q[predator.position] = 1
+			self.found_predator = True
 		else:
 
 			predator_P = self.calculate_transition_probability_matrix()
@@ -97,20 +97,19 @@ class Agent7:
 		max_predator_prob = max(self.predator_q)
 		return choice([i for i in self.graph.keys() if self.predator_q[i] == max_predator_prob]), choice([i for i in self.graph.keys() if self.prey_q[i] == max_prey_prob]) 
 
-	def calculate_transition_probability_matrix(self):
-		possible_locations = list(filter(lambda x: self.predator_q[x] != 0, self.graph.keys()))
-		# print(possible_locations)
-		P = [ [0 for i in range(self.config["GRAPH_SIZE"])] for i in range(self.config["GRAPH_SIZE"])]
-		for possible_location in possible_locations:
-			
-			shortest_distances = mp.getShortestDistancesToGoals(self.graph, self.position, self.graph[possible_location][:])
-			# print(shortest_distances)
-			min_dist = min(shortest_distances.values())
-			shortest_distances = {x:y for (x, y) in shortest_distances.items() if y <= min_dist}
-			# print(shortest_distances)
 
-			for neighbor in shortest_distances.keys():
-				P[neighbor][possible_location] = 1 / (len(shortest_distances.keys())) #1 / possible locations
+	def calculate_transition_probability_matrix(self):
+
+		shortest_distances = mp.getShortestDistancesToGoals(self.graph, self.position, list(self.graph.keys())[:])
+		P = [ [0 for i in range(self.config["GRAPH_SIZE"])] for i in range(self.config["GRAPH_SIZE"])]
+		for i in range(len(self.graph.keys())):
+			for j in self.graph[i]: # for every neighbor j of i, the probability of moving from j to i
+				P[i][j] = 0.4*(1 / len(self.graph[j]))
+				distances_from_j_neighbors = {x:shortest_distances[x] for x in self.graph[j]}
+				min_dist = min(distances_from_j_neighbors.values())
+				shortest_distances_from_j_neighbors = {x:y for (x, y) in distances_from_j_neighbors.items() if y <= min_dist}
+				if i in shortest_distances_from_j_neighbors.keys():
+					P[i][j] = P[i][j] + 0.6* (1 / len(shortest_distances_from_j_neighbors.keys()))
 		return P
 
 

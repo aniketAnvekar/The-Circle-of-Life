@@ -2,6 +2,7 @@ import Painter as p
 import Graph_01 as gr
 import Prey as PREY
 import Predator as PREDATOR
+import EasyPredator as EPREDATOR
 import json
 import random
 import Agent1 as AGENT1
@@ -87,8 +88,8 @@ def trials():
 	graph = gr.Graph(config["GRAPH_SIZE"], config)
 	graph.create()
 	agent_start = random.randrange(0, config["GRAPH_SIZE"])
-	agent = AGENT1.Agent1(graph.alist, agent_start, config)
-	predator = PREDATOR.Predator(graph.alist, config, agent_start)
+	agent = AGENT7D.Agent7D(graph.alist, agent_start, config)
+	predator = EPREDATOR.EasyPredator(graph.alist, config, agent_start)
 	prey = PREY.Prey(graph.alist, config, agent_start)
 	timeouts = 0
 	deaths = 0
@@ -123,8 +124,8 @@ def trials():
 		graph = gr.Graph(config["GRAPH_SIZE"], config)
 		graph.create()
 		agent_start = random.randrange(0, config["GRAPH_SIZE"])
-		agent = AGENT1.Agent1(graph.alist, agent_start, config)
-		predator = PREDATOR.Predator(graph.alist, config, agent_start)
+		agent = AGENT7D.Agent7D(graph.alist, agent_start, config)
+		predator = EPREDATOR.EasyPredator(graph.alist, config, agent_start)
 		prey = PREY.Prey(graph.alist, config, agent_start)
 
 	print("Timeouts: " + str(timeouts))

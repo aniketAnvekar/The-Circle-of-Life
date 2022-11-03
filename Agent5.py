@@ -22,15 +22,14 @@ class Agent5:
 
 		self.checkProbSum(sum(self.q))
 
-		if not self.found_predator: # agent does not know where the predator starts 
-			# initialization
-			self.q = [1/(self.config["GRAPH_SIZE"] - 1) for i in range(self.config["GRAPH_SIZE"])]
-			self.q[self.position] = 0
+		# if not self.found_predator: # agent does not know where the predator starts 
+		# 	# initialization
+		# 	self.q = [1/(self.config["GRAPH_SIZE"] - 1) for i in range(self.config["GRAPH_SIZE"])]
+		# 	self.q[self.position] = 0
 
-		# if not self.found_predator: # agent does know where the predator starts
-		# 	print("Running initialization...")
-		# 	self.q = [0 for i in range(self.config["GRAPH_SIZE"])]
-		# 	self.q[predator.position] = 1
+		if not self.found_predator: # agent does know where the predator starts
+			self.q = [0 for i in range(self.config["GRAPH_SIZE"])]
+			self.q[predator.position] = 1
 		else:
 			# update for predator
 			# print("Predator gunning for " + str(self.position))
@@ -79,32 +78,18 @@ class Agent5:
 		max_prob = max(self.q)
 		return choice([i for i in self.graph.keys() if self.q[i] == max_prob]) 
 
-
 	def calculate_transition_probability_matrix(self):
-		possible_locations = list(filter(lambda x: self.q[x] != 0, self.graph.keys()))
-		# print(possible_locations)
-		P = [ [0 for i in range(self.config["GRAPH_SIZE"])] for i in range(self.config["GRAPH_SIZE"])]
-		for possible_location in possible_locations:
-			# print(possible_location)
-			# calculate shortest distances to goal
-			# shortest_distances = {}
-			# mp.shortest_distances_to_goal(self.graph, set(), possible_location, self.position, shortest_distances)
-			# print(shortest_distances)
-			# keep only neighbors
-			# shortest_distances = {x:y for (x,y) in shortest_distances.items() if x in self.graph[possible_location]}
-			# print(shortest_distances)
-			# find minimum and filter for only remaining
-			# min_dist = min(shortest_distances.values())
-			# shortest_distances = {x:y for (x, y) in shortest_distances.items() if y <= min_dist}
-			
-			shortest_distances = mp.getShortestDistancesToGoals(self.graph, self.position, self.graph[possible_location][:])
-			# print(shortest_distances)
-			min_dist = min(shortest_distances.values())
-			shortest_distances = {x:y for (x, y) in shortest_distances.items() if y <= min_dist}
-			# print(shortest_distances)
 
-			for neighbor in shortest_distances.keys():
-				P[neighbor][possible_location] = 1 / (len(shortest_distances.keys())) #1 / possible locations
+		shortest_distances = mp.getShortestDistancesToGoals(self.graph, self.position, list(self.graph.keys())[:])
+		P = [ [0 for i in range(self.config["GRAPH_SIZE"])] for i in range(self.config["GRAPH_SIZE"])]
+		for i in range(len(self.graph.keys())):
+			for j in self.graph[i]: # for every neighbor j of i, the probability of moving from j to i
+				P[i][j] = 0.4*(1 / len(self.graph[j]))
+				distances_from_j_neighbors = {x:shortest_distances[x] for x in self.graph[j]}
+				min_dist = min(distances_from_j_neighbors.values())
+				shortest_distances_from_j_neighbors = {x:y for (x, y) in distances_from_j_neighbors.items() if y <= min_dist}
+				if i in shortest_distances_from_j_neighbors.keys():
+					P[i][j] = P[i][j] + 0.6* (1 / len(shortest_distances_from_j_neighbors.keys()))
 		return P
 
 
