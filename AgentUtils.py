@@ -66,3 +66,63 @@ def basic_update_agent(agent, predator, prey, estimated_predator_position=None, 
         agent.position = choice(list(same_to_pred))
 
     return 1 if agent.position == prey.position else -1 if agent.position == predator.position else 0
+
+
+    def gen_belief_agent_update_found_case(agent, transition_matrix):
+        agent.q = list(np.dot(transition_matrix, agent.q))
+        agent.checkProbSum(sum(agent.q))
+
+        old_agent_pos_prob = agent.q[agent.position]
+        agent.q = list(map(lambda x: x / (1 - old_agent_pos_prob), agent.q))
+        agent.q[agent.position] = 0
+
+    def prey_belief_agent_update(agent, prey):
+        if not agent.found_prey:
+            # initialization
+			agent.q = [1/(agent.config["GRAPH_SIZE"] - 1) for i in range(agent.config["GRAPH_SIZE"])]
+			agent.q[agent.position] = 0
+        else:
+            gen_belief_agent_update_found_case(agent, agent.P)
+
+    def predator_belief_agent_update(agent, predator):
+
+		if not agent.found_predator: # agent does know where the predator starts
+			agent.q = [0 for i in range(agent.config["GRAPH_SIZE"])]
+			agent.q[predator.position] = 1
+		else:
+            P = agent.calculate_transition_probability_matrix()
+			gen_belief_agent_update_found_case(agent, P)
+
+    def gen_belief_survey_update(agent, found, survey_spot):
+        if found:
+            agent.q = [0 for i in range(agent.config["GRAPH_SIZE"])]
+			agent.q[survey_spot] = 1
+        else:
+            old_survey_spot_prob = agent.q[survey_spot]
+			agent.q[survey_spot] = 0
+			agent.q = list(map(lambda x: x / (1 - old_survey_spot_prob), agent.q))
+
+    def prey_belief_survey_update(agent, prey):
+        max_prob = max(agent.q)
+		survey_spot = choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
+        agent.found_prey = (survey_spot == prey.position) or agent.found_prey
+
+        gen_belief_survey_update(agent, survey_spot == prey.position, survey_spot)
+		agent.checkProbSum(sum(agent.q))
+
+		max_prob = max(agent.q)
+		return choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
+
+
+    def predator_belief_survey_update(agent, predator):
+        agent.checkProbSum(sum(agent.q))
+
+		max_prob = max(agent.q)
+		survey_spot = choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
+        agent.found_predator = (survey_spot == predator.position) or agent.found_predator
+
+        gen_belief_survey_update(agent, survey_spot == predator.position, survey_spot)
+		agent.checkProbSum(sum(agent.q))
+
+        max_prob = max(agent.q)
+		return choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
