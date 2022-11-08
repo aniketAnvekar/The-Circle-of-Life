@@ -6,6 +6,7 @@ import EasyPredator as EPREDATOR
 import json
 import random
 import Agent1 as AGENT1
+import Agent2 as AGENT2
 import Agent3 as AGENT3
 import Agent5 as AGENT5
 import Agent7 as AGENT7
@@ -29,16 +30,16 @@ def init():
 	networkx_graph = graph.visualize()
 	fig, axis, node_positions, xlim, ylim = p.set_up_figure(networkx_graph)
 	canvas = p.init_canvas(frame, fig)
-	
+
 	#setting up players
 	agent_start = random.randrange(0, config["GRAPH_SIZE"])
-	agent = AGENT1.Agent1(graph.alist, agent_start, config)
+	agent = AGENT2.Agent2(graph.alist, agent_start, config)
 	predator = PREDATOR.Predator(graph.alist, config, agent_start)
 	prey = PREY.Prey(graph.alist, config, agent_start)
 
 	#setting update function
 	frame.after(config["TIME_DELAY"], lambda: update(frame, canvas, config, networkx_graph, fig, axis, node_positions, xlim, ylim, predator, prey, agent))
-	
+
 	return frame
 
 def update(frame, canvas, config, networkx_graph, fig, axis, node_positions, xlim, ylim, predator, prey, agent):
@@ -53,7 +54,7 @@ def update(frame, canvas, config, networkx_graph, fig, axis, node_positions, xli
 		return
 	elif status == -1:
 		print("Predator Win...")
-		return 
+		return
 
 	status = prey.update(agent.position)
 	if status == 1:
@@ -61,14 +62,14 @@ def update(frame, canvas, config, networkx_graph, fig, axis, node_positions, xli
 		return
 	elif status == -1:
 		print("Predator Win...")
-		return 
+		return
 	status = predator.update(agent.position)
 	if status == 1:
 		print("Agent Win...")
 		return
 	elif status == -1:
 		print("Predator Win...")
-		return 
+		return
 
 	input()
 
@@ -88,8 +89,8 @@ def trials():
 	graph = gr.Graph(config["GRAPH_SIZE"], config)
 	graph.create()
 	agent_start = random.randrange(0, config["GRAPH_SIZE"])
-	agent = AGENT7D.Agent7D(graph.alist, agent_start, config)
-	predator = EPREDATOR.EasyPredator(graph.alist, config, agent_start)
+	agent = AGENT2.Agent2(graph.alist, agent_start, config)
+	predator = PREDATOR.Predator(graph.alist, config, agent_start)
 	prey = PREY.Prey(graph.alist, config, agent_start)
 	timeouts = 0
 	deaths = 0
@@ -124,8 +125,8 @@ def trials():
 		graph = gr.Graph(config["GRAPH_SIZE"], config)
 		graph.create()
 		agent_start = random.randrange(0, config["GRAPH_SIZE"])
-		agent = AGENT7D.Agent7D(graph.alist, agent_start, config)
-		predator = EPREDATOR.EasyPredator(graph.alist, config, agent_start)
+		agent = AGENT2.Agent2(graph.alist, agent_start, config)
+		predator = PREDATOR.Predator(graph.alist, config, agent_start)
 		prey = PREY.Prey(graph.alist, config, agent_start)
 
 	print("Timeouts: " + str(timeouts))
@@ -135,10 +136,3 @@ def trials():
 
 
 trials()
-
-
-
-
-
-
-

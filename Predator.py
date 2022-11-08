@@ -5,12 +5,14 @@ from collections import deque
 
 class Predator:
 
-    def __init__(self, graph, config, agent_pos):
-        while True:
-            self.position = random.randrange(0, config["GRAPH_SIZE"])
-            if not self.position == agent_pos:
-                break
-
+    def __init__(self, graph, config, agent_pos, simulation=None):
+        if simulation is None:
+            while True:
+                self.position = random.randrange(0, config["GRAPH_SIZE"])
+                if not self.position == agent_pos:
+                    break
+        else:
+            self.position = simulation
         self.graph = graph
         self.last_agent_pos = -1
         self.path = deque()
@@ -24,5 +26,3 @@ class Predator:
         self.last_agent_pos = agent_pos
 
         return -1 if self.position == agent_pos else 0
-            
-

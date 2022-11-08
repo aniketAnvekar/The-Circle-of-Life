@@ -1,5 +1,5 @@
 import queue as q
-from collections import deque 
+from collections import deque
 from random import shuffle
 
 
@@ -21,8 +21,9 @@ def getShortestDistancesToGoals(graph, start, goals):
 			goals.remove(cur)
 
 		if cur not in visited:
-			shuffle(graph[cur])
-			for neighbor in graph[cur]:
+			neighbors = graph[cur][:]
+			shuffle(neighbors)
+			for neighbor in neighbors:
 				if neighbor not in visited:
 					queue.put(neighbor)
 					if neighbor not in lengths.keys():
@@ -35,7 +36,7 @@ def getShortestDistancesToGoals(graph, start, goals):
 def shortestPathToGoal(graph, start, goal):
 	queue = q.Queue()
 	queue.put(start)
-	visited = set() 
+	visited = set()
 	paths = {}
 
 	while not queue.empty():
@@ -94,5 +95,3 @@ def shortest_distances_to_goal(graph, visited, cur, goal, shortest_distances):
 		print("Invalid distance: " + str(cur))
 		for neighbor in graph[cur]:
 			print(neighbor, shortest_distances[neighbor])
-
-
