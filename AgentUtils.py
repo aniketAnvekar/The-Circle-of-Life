@@ -1,7 +1,6 @@
 import MapUtils as mp
 from random import choice
-
-
+import Predator as pr
 
 
 def basic_update_agent(agent, predator, prey, estimated_predator_position=None, estimated_prey_position=None):
@@ -11,7 +10,8 @@ def basic_update_agent(agent, predator, prey, estimated_predator_position=None, 
     if estimated_predator_position is None:
         predator_distances = mp.getShortestDistancesToGoals(agent.graph, predator.position, neighbors_and_self[:])
     else:
-        predator_distances = mp.getShortestDistancesToGoals(agent.graph, estimated_predator_position, neighbors_and_self[:])
+        predator_distances = mp.getShortestDistancesToGoals(agent.graph, estimated_predator_position,
+                                                            neighbors_and_self[:])
 
     if estimated_prey_position is None:
         prey_distances = mp.getShortestDistancesToGoals(agent.graph, prey.position, neighbors_and_self[:])
@@ -39,18 +39,21 @@ def basic_update_agent(agent, predator, prey, estimated_predator_position=None, 
     # print(smallest_prey, predator_distances[smallest_prey_pos], cur_dist_prey, cur_dist_pred)
     # print(prey_distances[largest_pred_pos], largest_pred, cur_dist_prey, cur_dist_pred)
 
-    closer_to_prey = set([x for x in prey_distances.keys() if prey_distances[x] < cur_dist_prey and x != agent.position] )
+    closer_to_prey = set(
+        [x for x in prey_distances.keys() if prey_distances[x] < cur_dist_prey and x != agent.position])
     same_to_prey = set([x for x in prey_distances.keys() if prey_distances[x] == cur_dist_prey and x != agent.position])
     far_from_prey = set([x for x in prey_distances.keys() if prey_distances[x] > cur_dist_prey and x != agent.position])
-    closer_to_pred = set([x for x in predator_distances.keys() if predator_distances[x] < cur_dist_pred and x != agent.position])
-    same_to_pred = set([x for x in predator_distances.keys() if predator_distances[x] == cur_dist_pred and x != agent.position])
-    far_from_pred = set([x for x in predator_distances.keys() if predator_distances[x] > cur_dist_pred and x != agent.position])
+    closer_to_pred = set(
+        [x for x in predator_distances.keys() if predator_distances[x] < cur_dist_pred and x != agent.position])
+    same_to_pred = set(
+        [x for x in predator_distances.keys() if predator_distances[x] == cur_dist_pred and x != agent.position])
+    far_from_pred = set(
+        [x for x in predator_distances.keys() if predator_distances[x] > cur_dist_pred and x != agent.position])
 
     closer_to_prey_and_further_from_pred = closer_to_prey.intersection(far_from_pred)
     closer_to_prey_and_same_from_pred = closer_to_prey.intersection(same_to_pred)
     same_to_prey_and_further_from_pred = same_to_prey.intersection(far_from_pred)
     same_to_prey_and_same_from_pred = same_to_prey.intersection(same_to_pred)
-
 
     if len(closer_to_prey_and_further_from_pred) != 0:
         agent.position = choice(list(closer_to_prey_and_further_from_pred))
@@ -68,61 +71,94 @@ def basic_update_agent(agent, predator, prey, estimated_predator_position=None, 
     return 1 if agent.position == prey.position else -1 if agent.position == predator.position else 0
 
 
-    def gen_belief_agent_update_found_case(agent, transition_matrix):
-        agent.q = list(np.dot(transition_matrix, agent.q))
-        agent.checkProbSum(sum(agent.q))
+def advanced_update_agent(agent, predator, prey, estimated_pred_position=None, estimated_prey_position=None):
+    min_neighbor = -1
+    min_dist = 1000
+    for neighbor in agent.graph[agent.position]:
 
-        old_agent_pos_prob = agent.q[agent.position]
-        agent.q = list(map(lambda x: x / (1 - old_agent_pos_prob), agent.q))
-        agent.q[agent.position] = 0
+        sim_predator = pr.Predator(agent.graph, agent.config, agent.position,
+                                   simulation=predator.position if estimated_pred_position is None else estimated_pred_position)
+        dist = mp.recursive_search(agent, agent.config["DEPTH"], neighbor, sim_predator,
+                                   prey.position if estimated_prey_position is None else estimated_prey_position, set())
 
-    def prey_belief_agent_update(agent, prey):
-        if not agent.found_prey:
-            # initialization
-			agent.q = [1/(agent.config["GRAPH_SIZE"] - 1) for i in range(agent.config["GRAPH_SIZE"])]
-			agent.q[agent.position] = 0
-        else:
-            gen_belief_agent_update_found_case(agent, agent.P)
+        if not dist is None:
+            if dist < min_dist or (dist == min_dist and agent.visited[neighbor] <= agent.visited[min_neighbor]):
+                min_dist = dist
+                min_neighbor = neighbor
 
-    def predator_belief_agent_update(agent, predator):
+    if min_neighbor != -1:
+        agent.position = min_neighbor
+    agent.visited[agent.position] = agent.visited[agent.position] + 1
 
-		if not agent.found_predator: # agent does know where the predator starts
-			agent.q = [0 for i in range(agent.config["GRAPH_SIZE"])]
-			agent.q[predator.position] = 1
-		else:
-            P = agent.calculate_transition_probability_matrix()
-			gen_belief_agent_update_found_case(agent, P)
-
-    def gen_belief_survey_update(agent, found, survey_spot):
-        if found:
-            agent.q = [0 for i in range(agent.config["GRAPH_SIZE"])]
-			agent.q[survey_spot] = 1
-        else:
-            old_survey_spot_prob = agent.q[survey_spot]
-			agent.q[survey_spot] = 0
-			agent.q = list(map(lambda x: x / (1 - old_survey_spot_prob), agent.q))
-
-    def prey_belief_survey_update(agent, prey):
-        max_prob = max(agent.q)
-		survey_spot = choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
-        agent.found_prey = (survey_spot == prey.position) or agent.found_prey
-
-        gen_belief_survey_update(agent, survey_spot == prey.position, survey_spot)
-		agent.checkProbSum(sum(agent.q))
-
-		max_prob = max(agent.q)
-		return choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
+    return 1 if agent.position == prey.position else -1 if agent.position == predator.position else 0
 
 
-    def predator_belief_survey_update(agent, predator):
-        agent.checkProbSum(sum(agent.q))
+def normalize_probs(vector):
+    s = sum(vector)
+    vector = list(map(lambda x: x / s, vector))
+    return vector
 
-		max_prob = max(agent.q)
-		survey_spot = choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
-        agent.found_predator = (survey_spot == predator.position) or agent.found_predator
+def checkProbSum(su):
+    if abs(1 - su) < 0.00000000000001: # 0.000000000000001
+        return
+    print("BELIEF SYSTEM FAULTY: " + str(su))
+    exit()
 
-        gen_belief_survey_update(agent, survey_spot == predator.position, survey_spot)
-		agent.checkProbSum(sum(agent.q))
-
-        max_prob = max(agent.q)
-		return choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
+# def gen_belief_agent_update_found_case(agent, transition_matrix):
+#     agent.q = list(np.dot(transition_matrix, agent.q))
+#     agent.checkProbSum(sum(agent.q))
+#
+#     old_agent_pos_prob = agent.q[agent.position]
+#     agent.q = list(map(lambda x: x / (1 - old_agent_pos_prob), agent.q))
+#     agent.q[agent.position] = 0
+#
+# def prey_belief_agent_update(agent, prey):
+#     if not agent.found_prey:
+#         # initialization
+# 		agent.q = [1/(agent.config["GRAPH_SIZE"] - 1) for i in range(agent.config["GRAPH_SIZE"])]
+# 		agent.q[agent.position] = 0
+#     else:
+#         gen_belief_agent_update_found_case(agent, agent.P)
+#
+# def predator_belief_agent_update(agent, predator):
+#
+# 	if not agent.found_predator: # agent does know where the predator starts
+# 		agent.q = [0 for i in range(agent.config["GRAPH_SIZE"])]
+# 		agent.q[predator.position] = 1
+# 	else:
+#         P = agent.calculate_transition_probability_matrix()
+# 		gen_belief_agent_update_found_case(agent, P)
+#
+# def gen_belief_survey_update(agent, found, survey_spot):
+#     if found:
+#         agent.q = [0 for i in range(agent.config["GRAPH_SIZE"])]
+# 		agent.q[survey_spot] = 1
+#     else:
+#         old_survey_spot_prob = agent.q[survey_spot]
+# 		agent.q[survey_spot] = 0
+# 		agent.q = list(map(lambda x: x / (1 - old_survey_spot_prob), agent.q))
+#
+# def prey_belief_survey_update(agent, prey):
+#     max_prob = max(agent.q)
+# 	survey_spot = choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
+#     agent.found_prey = (survey_spot == prey.position) or agent.found_prey
+#
+#     gen_belief_survey_update(agent, survey_spot == prey.position, survey_spot)
+# 	agent.checkProbSum(sum(agent.q))
+#
+# 	max_prob = max(agent.q)
+# 	return choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
+#
+#
+# def predator_belief_survey_update(agent, predator):
+#     agent.checkProbSum(sum(agent.q))
+#
+# 	max_prob = max(agent.q)
+# 	survey_spot = choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])
+#     agent.found_predator = (survey_spot == predator.position) or agent.found_predator
+#
+#     gen_belief_survey_update(agent, survey_spot == predator.position, survey_spot)
+# 	agent.checkProbSum(sum(agent.q))
+#
+#     max_prob = max(agent.q)
+# 	return choice([i for i in agent.graph.keys() if agent.q[i] == max_prob])

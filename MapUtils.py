@@ -1,6 +1,7 @@
 import queue as q
 from collections import deque
 from random import shuffle
+import Predator as pr
 
 
 def getShortestDistancesToGoals(graph, start, goals):
@@ -95,3 +96,28 @@ def shortest_distances_to_goal(graph, visited, cur, goal, shortest_distances):
 		print("Invalid distance: " + str(cur))
 		for neighbor in graph[cur]:
 			print(neighbor, shortest_distances[neighbor])
+
+def recursive_search(agent, depth, cur, sim_predator, prey_pos, visited):
+	if cur == prey_pos:
+		return -1*depth
+
+	visited.add(cur)
+	sim_predator.update(cur)
+
+	if cur == sim_predator.position:
+		return None
+	elif depth == 0:
+		return getShortestDistancesToGoals(agent.graph, cur, [prey_pos])[prey_pos]
+
+	min_dist = 10000
+	for neighbor in agent.graph[cur]:
+		if neighbor not in visited:
+			new_sim_predator = pr.Predator(agent.graph, agent.config, agent.position, simulation=sim_predator.position)
+			dist = recursive_search(agent, depth - 1, neighbor, new_sim_predator, prey_pos, visited)
+			if not dist is None:
+				min_dist = min(min_dist, dist)
+
+	if min_dist == 10000:
+		min_dist = None
+
+	return min_dist

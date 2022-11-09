@@ -8,9 +8,12 @@ import random
 import Agent1 as AGENT1
 import Agent2 as AGENT2
 import Agent3 as AGENT3
+import Agent4 as AGENT4
 import Agent5 as AGENT5
+import Agent6 as AGENT6
 import Agent7 as AGENT7
 import Agent7D as AGENT7D
+import Agent8 as AGENT8
 
 def load_config():
 	with open("./config.json", "r") as f:
@@ -89,7 +92,7 @@ def trials():
 	graph = gr.Graph(config["GRAPH_SIZE"], config)
 	graph.create()
 	agent_start = random.randrange(0, config["GRAPH_SIZE"])
-	agent = AGENT2.Agent2(graph.alist, agent_start, config)
+	agent = AGENT4.Agent4(graph.alist, agent_start, config)
 	predator = PREDATOR.Predator(graph.alist, config, agent_start)
 	prey = PREY.Prey(graph.alist, config, agent_start)
 	timeouts = 0
@@ -125,7 +128,7 @@ def trials():
 		graph = gr.Graph(config["GRAPH_SIZE"], config)
 		graph.create()
 		agent_start = random.randrange(0, config["GRAPH_SIZE"])
-		agent = AGENT2.Agent2(graph.alist, agent_start, config)
+		agent = AGENT4.Agent4(graph.alist, agent_start, config)
 		predator = PREDATOR.Predator(graph.alist, config, agent_start)
 		prey = PREY.Prey(graph.alist, config, agent_start)
 
