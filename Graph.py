@@ -1,6 +1,7 @@
 import random
+
 import networkx as nx
-import matplotlib.pyplot as plt
+
 
 class Graph:
 
@@ -10,21 +11,21 @@ class Graph:
         self.config = config
 
     def create(self):
-        for i in range(self.nodes-1):
+        for i in range(self.nodes - 1):
             try:
-                self.alist[i].append(i+1)
+                self.alist[i].append(i + 1)
             except:
-                self.alist[i] = [i+1]
-            
-            self.alist[i+1] = [i]
-        self.alist[self.nodes-1] = [0]
-        self.alist[self.nodes-1].append(self.nodes-2)
-        self.alist[0].append(self.nodes-1)
-        self.alist = self.create_additionalEdges()
+                self.alist[i] = [i + 1]
+
+            self.alist[i + 1] = [i]
+        self.alist[self.nodes - 1] = [0]
+        self.alist[self.nodes - 1].append(self.nodes - 2)
+        self.alist[0].append(self.nodes - 1)
+        self.alist = self.create_additional_edges()
         # print(self.alist)
         return self.alist
 
-    def create_additionalEdges(self):
+    def create_additional_edges(self):
 
         i = self.nodes
         j = 1
@@ -58,18 +59,18 @@ class Graph:
 
     def create_edges(self):
         edges = []
-        for k,v in self.alist.items():
+        for k, v in self.alist.items():
             for ele in v:
-                if (k,ele) not in edges:
-                    edges.append((k,ele))
-        return edges 
+                if (k, ele) not in edges:
+                    edges.append((k, ele))
+        return edges
 
     def visualize(self):
-        G = nx.Graph()
-        
+        g = nx.Graph()
+
         for i in range(0, self.config["GRAPH_SIZE"]):
-            G.add_node(i) 
-        
+            g.add_node(i)
+
         edges = self.create_edges()
-        G.add_edges_from(edges)
-        return G
+        g.add_edges_from(edges)
+        return g

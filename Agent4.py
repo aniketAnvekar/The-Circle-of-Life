@@ -40,7 +40,7 @@ class Agent4:
 		# 	print("Total Belief Sum Account for Current Agent Pos: " + str(sum(self.q)))
 
 		self.q = au.normalize_probs(self.q)
-		au.checkProbSum(sum(self.q))
+		au.check_prob_sum(sum(self.q))
 		# print("Total Belief Sum: " + str(sum(self.q)))
 
 		#survey a node
@@ -61,7 +61,7 @@ class Agent4:
 
 		# print("Total Belief Sum: " + str(sum(self.q)))
 		self.q = au.normalize_probs(self.q)
-		au.checkProbSum(sum(self.q))
+		au.check_prob_sum(sum(self.q))
 
 		max_prob = max(self.q)
 		return choice([i for i in self.graph.keys() if self.q[i] == max_prob])
@@ -70,7 +70,7 @@ class Agent4:
 		estimated_prey_position = self.belief_system(prey)
 		options = list(filter(lambda x: self.q[x] == self.q[estimated_prey_position], self.graph.keys()))
 		if len(options) != 1:
-			distances = mp.getShortestDistancesToGoals(self.graph, predator.position, options)
+			distances = mp.get_shortest_distances_to_goals(self.graph, predator.position, options)
 			longest = max(distances.values())
 			estimated_prey_position = choice([i for i in distances.keys() if distances[i] == longest])
 

@@ -1,15 +1,16 @@
+import random
+
 import MapUtils as mp
 from random import choice
 import numpy as np
 import AgentUtils as au
 
 
-class Agent8:
+class Agent7B:
     def __init__(self, graph, start, config):
         self.position = start
         self.graph = graph
         self.config = config
-        self.visited = [0 for _ in self.graph.keys()]
         self.prey_q = [1 / (self.config["GRAPH_SIZE"]) for i in
                        range(self.config["GRAPH_SIZE"])]  # vector containing probabilities of where the prey is
         self.predator_q = []
@@ -23,12 +24,6 @@ class Agent8:
         self.found_predator = False
         self.predator_q = [1 / (self.config["GRAPH_SIZE"]) for i in
                            range(self.config["GRAPH_SIZE"])]  # vector containing probabilities of where the prey is
-
-    def checkProbSum(self, su):
-        if abs(1 - su) < 0.000000001:  # 0.000000000000001
-            return
-        print("BELIEF SYSTEM FAULTY")
-        exit()
 
     def belief_system(self, predator, prey):
 
@@ -71,23 +66,35 @@ class Agent8:
             max_prey_prob = max(self.prey_q)
             survey_spot = choice([i for i in self.graph.keys() if self.prey_q[i] == max_prey_prob])
 
-        if survey_spot == prey.position:
-            self.prey_q = [0 for i in range(self.config["GRAPH_SIZE"])]
-            self.prey_q[survey_spot] = 1
-            self.found_prey = True
-        else:
+        defective = random.randrange(100) < 10
+
+        if defective:  # false negative
             old_survey_spot_prob = self.prey_q[survey_spot]
             self.prey_q[survey_spot] = 0
             self.prey_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.prey_q))
-
-        if survey_spot == predator.position:
-            self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])]
-            self.predator_q[survey_spot] = 1
-            self.found_predator = True
-        else:
             old_survey_spot_prob = self.predator_q[survey_spot]
-            self.predator_q[survey_spot] = 0
-            self.predator_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.predator_q))
+            if old_survey_spot_prob != 1:
+                self.predator_q[survey_spot] = 0
+                self.predator_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.predator_q))
+
+        else:  # otherwise act normally
+            if survey_spot == prey.position:
+                self.prey_q = [0 for i in range(self.config["GRAPH_SIZE"])]
+                self.prey_q[survey_spot] = 1
+                self.found_prey = True
+            else:
+                old_survey_spot_prob = self.prey_q[survey_spot]
+                self.prey_q[survey_spot] = 0
+                self.prey_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.prey_q))
+
+            if survey_spot == predator.position:
+                self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])]
+                self.predator_q[survey_spot] = 1
+                self.found_predator = True
+            else:
+                old_survey_spot_prob = self.predator_q[survey_spot]
+                self.predator_q[survey_spot] = 0
+                self.predator_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.predator_q))
 
         self.prey_q = au.normalize_probs(self.prey_q)
         au.check_prob_sum(sum(self.prey_q))
@@ -118,17 +125,5 @@ class Agent8:
 
         estimated_predator_position, estimated_prey_position = self.belief_system(predator, prey)
 
-        options = list(filter(lambda x: self.predator_q[x] == self.predator_q[estimated_predator_position], self.graph.keys()))
-        if len(options) != 1:
-            distances = mp.get_shortest_distances_to_goals(self.graph, self.position, options)
-            shortest = min(distances.values())
-            estimated_predator_position = choice([i for i in distances.keys() if distances[i] == shortest])
-
-        options = list(filter(lambda x: self.prey_q[x] == self.prey_q[estimated_prey_position], self.graph.keys()))
-        if len(options) != 1:
-            distances = mp.get_shortest_distances_to_goals(self.graph, estimated_predator_position, options)
-            longest = max(distances.values())
-            estimated_prey_position = choice([i for i in distances.keys() if distances[i] == longest])
-
-        return au.advanced_update_agent(self, predator, prey, estimated_pred_position=estimated_predator_position,
-                                        estimated_prey_position=estimated_prey_position)
+        return au.basic_update_agent(self, predator, prey, estimated_predator_position=estimated_predator_position,
+                                     estimated_prey_position=estimated_prey_position)

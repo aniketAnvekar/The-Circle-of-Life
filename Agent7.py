@@ -58,17 +58,17 @@ class Agent7:
 			self.prey_q[self.position] = 0
 
 		self.prey_q = au.normalize_probs(self.prey_q)
-		au.checkProbSum(sum(self.prey_q))
+		au.check_prob_sum(sum(self.prey_q))
 		self.predator_q = au.normalize_probs(self.predator_q)
-		au.checkProbSum(sum(self.predator_q))
+		au.check_prob_sum(sum(self.predator_q))
 
 		max_predator_prob = max(self.predator_q)
 		survey_spot = 0
 		if max_predator_prob != 1:
+			survey_spot = choice([i for i in self.graph.keys() if self.predator_q[i] == max_predator_prob])
+		else:
 			max_prey_prob = max(self.prey_q)
 			survey_spot = choice([i for i in self.graph.keys() if self.prey_q[i] == max_prey_prob])
-		else:
-			survey_spot = choice([i for i in self.graph.keys() if self.predator_q[i] == max_predator_prob])
 
 		if survey_spot == prey.position:
 			self.prey_q = [0 for i in range(self.config["GRAPH_SIZE"])]
@@ -89,9 +89,9 @@ class Agent7:
 			self.predator_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.predator_q))
 
 		self.prey_q = au.normalize_probs(self.prey_q)
-		au.checkProbSum(sum(self.prey_q))
+		au.check_prob_sum(sum(self.prey_q))
 		self.predator_q = au.normalize_probs(self.predator_q)
-		au.checkProbSum(sum(self.predator_q))
+		au.check_prob_sum(sum(self.predator_q))
 
 		max_prey_prob = max(self.prey_q)
 		max_predator_prob = max(self.predator_q)
@@ -100,7 +100,7 @@ class Agent7:
 
 	def calculate_transition_probability_matrix(self):
 
-		shortest_distances = mp.getShortestDistancesToGoals(self.graph, self.position, list(self.graph.keys())[:])
+		shortest_distances = mp.get_shortest_distances_to_goals(self.graph, self.position, list(self.graph.keys())[:])
 		P = [[0 for i in range(self.config["GRAPH_SIZE"])] for i in range(self.config["GRAPH_SIZE"])]
 		for i in range(len(self.graph.keys())):
 			for j in self.graph[i]:  # for every neighbor j of i, the probability of moving from j to i

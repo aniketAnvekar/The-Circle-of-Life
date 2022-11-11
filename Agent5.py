@@ -28,7 +28,7 @@ class Agent5:
             self.q[self.position] = 0
 
         self.q = au.normalize_probs(self.q)
-        au.checkProbSum(sum(self.q))
+        au.check_prob_sum(sum(self.q))
 
         max_prob = max(self.q)
         survey_spot = choice([i for i in self.graph.keys() if self.q[i] == max_prob])
@@ -44,14 +44,14 @@ class Agent5:
 
         # print("Total Belief Sum: " + str(sum(self.q)))
         self.q = au.normalize_probs(self.q)
-        au.checkProbSum(sum(self.q))
+        au.check_prob_sum(sum(self.q))
 
         max_prob = max(self.q)
         return choice([i for i in self.graph.keys() if self.q[i] == max_prob])
 
     def calculate_transition_probability_matrix(self):
 
-        shortest_distances = mp.getShortestDistancesToGoals(self.graph, self.position, list(self.graph.keys())[:])
+        shortest_distances = mp.get_shortest_distances_to_goals(self.graph, self.position, list(self.graph.keys())[:])
         P = [[0 for i in range(self.config["GRAPH_SIZE"])] for i in range(self.config["GRAPH_SIZE"])]
         for i in range(len(self.graph.keys())):
             for j in self.graph[i]:  # for every neighbor j of i, the probability of moving from j to i

@@ -4,120 +4,104 @@ from random import shuffle
 import Predator as pr
 
 
-def getShortestDistancesToGoals(graph, start, goals):
-	queue = q.Queue()
-	queue.put(start)
-	visited = set()
-	shortestDistances = {}
-	lengths = {}
+def get_shortest_distances_to_goals(graph, start, goals):
+    queue = q.Queue()
+    queue.put(start)
+    visited = set()
+    shortest_distances = {}
+    lengths = {start: 0}
 
-	lengths[start] = 0
+    while not queue.empty() and len(goals) > 0:
 
-	while not queue.empty() and len(goals) > 0:
+        cur = queue.get()
 
-		cur = queue.get()
+        if cur in goals:
+            shortest_distances[cur] = lengths[cur]
+            goals.remove(cur)
 
-		if cur in goals:
-			shortestDistances[cur] = lengths[cur]
-			goals.remove(cur)
+        if cur not in visited:
+            neighbors = graph[cur][:]
+            shuffle(neighbors)
+            for neighbor in neighbors:
+                if neighbor not in visited:
+                    queue.put(neighbor)
+                    if neighbor not in lengths.keys():
+                        lengths[neighbor] = lengths[cur] + 1
 
-		if cur not in visited:
-			neighbors = graph[cur][:]
-			shuffle(neighbors)
-			for neighbor in neighbors:
-				if neighbor not in visited:
-					queue.put(neighbor)
-					if neighbor not in lengths.keys():
-						lengths[neighbor] = lengths[cur] + 1
+        visited.add(cur)
 
-		visited.add(cur)
-
-	return shortestDistances
-
-def shortestPathToGoal(graph, start, goal):
-	queue = q.Queue()
-	queue.put(start)
-	visited = set()
-	paths = {}
-
-	while not queue.empty():
-		# print("Running search...")
-		cur = queue.get()
-		# print("Initialized cur...")
-
-		if cur == goal:
-			# print("Found Goal...")
-			break
-		# print("Checked if is goal...")
-		if cur not in visited:
-			# print("Before: " + str(graph[cur]))
-			# graph[cur].sort(key=actually_visited.get)
-			# print("After: " + str(graph[cur]))
-			for neighbor in graph[cur]:
-				# print("Cur's neighbors: ", cur, graph[cur])
-				if neighbor not in visited:
-					# print("Adding neighbor...")
-					queue.put(neighbor)
-					if neighbor not in paths.keys():
-						paths[neighbor] = cur
-					# print("Adding neighbor: ", neighbor, cur)
-
-		visited.add(cur)
-		# print("Visited: ", len(visited))
-
-	return mapToStack(paths, goal, start)
+    return shortest_distances
 
 
-def mapToStack(paths, goal, start):
-	stack = deque()
-	stack.append(goal)
-	cur = goal
-	# print(paths)
-	while cur in paths.keys():
-		cur = paths[cur]
-		if cur == start:
-			break
-		stack.append(cur)
+def shortest_path_to_goal(graph, start, goal):
+    queue = q.Queue()
+    queue.put(start)
+    visited = set()
+    paths = {}
 
-	return stack
+    while not queue.empty():
+        # print("Running search...")
+        cur = queue.get()
+        # print("Initialized cur...")
 
-def shortest_distances_to_goal(graph, visited, cur, goal, shortest_distances):
-	if cur == goal:
-		shortest_distances[cur] = 0
-		return
-	visited.add(cur)
-	shortest_distances[cur] = len(graph.keys()) + 1
-	for neighbor in graph[cur]:
-		if neighbor not in visited:
-			print("Checking neighbor " + str(neighbor) + " of " + str(cur))
-			shortest_distances_to_goal(graph, visited, neighbor, goal, shortest_distances)
-		shortest_distances[cur] = min(shortest_distances[cur], shortest_distances[neighbor] + 1)
-	if shortest_distances[cur] == 26:
-		print("Invalid distance: " + str(cur))
-		for neighbor in graph[cur]:
-			print(neighbor, shortest_distances[neighbor])
+        if cur == goal:
+            # print("Found Goal...")
+            break
+        # print("Checked if is goal...")
+        if cur not in visited:
+            # print("Before: " + str(graph[cur]))
+            # graph[cur].sort(key=actually_visited.get)
+            # print("After: " + str(graph[cur]))
+            for neighbor in graph[cur]:
+                # print("Cur's neighbors: ", cur, graph[cur])
+                if neighbor not in visited:
+                    # print("Adding neighbor...")
+                    queue.put(neighbor)
+                    if neighbor not in paths.keys():
+                        paths[neighbor] = cur
+                # print("Adding neighbor: ", neighbor, cur)
+
+        visited.add(cur)
+    # print("Visited: ", len(visited))
+
+    return map_to_stack(paths, goal, start)
+
+
+def map_to_stack(paths, goal, start):
+    stack = deque()
+    stack.append(goal)
+    cur = goal
+    # print(paths)
+    while cur in paths.keys():
+        cur = paths[cur]
+        if cur == start:
+            break
+        stack.append(cur)
+
+    return stack
+
 
 def recursive_search(agent, depth, cur, sim_predator, prey_pos, visited):
-	if cur == prey_pos:
-		return -1*depth
+    if cur == prey_pos:
+        return -1 * depth
 
-	visited.add(cur)
-	sim_predator.update(cur)
+    visited.add(cur)
+    sim_predator.update(cur)
 
-	if cur == sim_predator.position:
-		return None
-	elif depth == 0:
-		return getShortestDistancesToGoals(agent.graph, cur, [prey_pos])[prey_pos]
+    if cur == sim_predator.position:
+        return None
+    elif depth == 0:
+        return get_shortest_distances_to_goals(agent.graph, cur, [prey_pos])[prey_pos]
 
-	min_dist = 10000
-	for neighbor in agent.graph[cur]:
-		if neighbor not in visited:
-			new_sim_predator = pr.Predator(agent.graph, agent.config, agent.position, simulation=sim_predator.position)
-			dist = recursive_search(agent, depth - 1, neighbor, new_sim_predator, prey_pos, visited)
-			if not dist is None:
-				min_dist = min(min_dist, dist)
+    min_dist = 10000
+    for neighbor in agent.graph[cur]:
+        if neighbor not in visited:
+            new_sim_predator = pr.Predator(agent.graph, agent.config, agent.position, simulation=sim_predator.position)
+            dist = recursive_search(agent, depth - 1, neighbor, new_sim_predator, prey_pos, visited)
+            if dist is not None:
+                min_dist = min(min_dist, dist)
 
-	if min_dist == 10000:
-		min_dist = None
+    if min_dist == 10000:
+        min_dist = None
 
-	return min_dist
+    return min_dist

@@ -36,7 +36,7 @@ class Agent3:
 			# 	print("Total Belief Sum Account for Current Agent Pos: " + str(sum(self.q)))
 
 		self.q = au.normalize_probs(self.q)
-		au.checkProbSum(sum(self.q))
+		au.check_prob_sum(sum(self.q))
 		# print("Total Belief Sum: " + str(sum(self.q)))
 
 		#survey a node
@@ -57,7 +57,7 @@ class Agent3:
 
 		# print("Total Belief Sum: " + str(sum(self.q)))
 		self.q = au.normalize_probs(self.q)
-		au.checkProbSum(sum(self.q))
+		au.check_prob_sum(sum(self.q))
 
 		max_prob = max(self.q)
 		return choice([i for i in self.graph.keys() if self.q[i] == max_prob])

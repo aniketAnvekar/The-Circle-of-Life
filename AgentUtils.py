@@ -8,43 +8,22 @@ def basic_update_agent(agent, predator, prey, estimated_predator_position=None, 
     neighbors_and_self.append(agent.position)
 
     if estimated_predator_position is None:
-        predator_distances = mp.getShortestDistancesToGoals(agent.graph, predator.position, neighbors_and_self[:])
+        predator_distances = mp.get_shortest_distances_to_goals(agent.graph, predator.position, neighbors_and_self[:])
     else:
-        predator_distances = mp.getShortestDistancesToGoals(agent.graph, estimated_predator_position,
-                                                            neighbors_and_self[:])
+        predator_distances = mp.get_shortest_distances_to_goals(agent.graph, estimated_predator_position,
+                                                                neighbors_and_self[:])
 
     if estimated_prey_position is None:
-        prey_distances = mp.getShortestDistancesToGoals(agent.graph, prey.position, neighbors_and_self[:])
+        prey_distances = mp.get_shortest_distances_to_goals(agent.graph, prey.position, neighbors_and_self[:])
     else:
-        prey_distances = mp.getShortestDistancesToGoals(agent.graph, estimated_prey_position, neighbors_and_self[:])
+        prey_distances = mp.get_shortest_distances_to_goals(agent.graph, estimated_prey_position, neighbors_and_self[:])
 
-    # print(predator_distances)
-    # print(prey_distances)
     cur_dist_pred = predator_distances[agent.position]
     cur_dist_prey = prey_distances[agent.position]
-    smallest_prey = agent.config["GRAPH_SIZE"] + 1
-    smallest_prey_pos = -1
-    largest_pred = -1
-    largest_pred_pos = -1
-
-    for position in predator_distances.keys():
-
-        if prey_distances[position] <= smallest_prey:
-            smallest_prey = prey_distances[position]
-            smallest_prey_pos = position
-        if predator_distances[position] >= largest_pred:
-            largest_pred = predator_distances[position]
-            largest_pred_pos = position
-
-    # print(smallest_prey, predator_distances[smallest_prey_pos], cur_dist_prey, cur_dist_pred)
-    # print(prey_distances[largest_pred_pos], largest_pred, cur_dist_prey, cur_dist_pred)
 
     closer_to_prey = set(
         [x for x in prey_distances.keys() if prey_distances[x] < cur_dist_prey and x != agent.position])
     same_to_prey = set([x for x in prey_distances.keys() if prey_distances[x] == cur_dist_prey and x != agent.position])
-    far_from_prey = set([x for x in prey_distances.keys() if prey_distances[x] > cur_dist_prey and x != agent.position])
-    closer_to_pred = set(
-        [x for x in predator_distances.keys() if predator_distances[x] < cur_dist_pred and x != agent.position])
     same_to_pred = set(
         [x for x in predator_distances.keys() if predator_distances[x] == cur_dist_pred and x != agent.position])
     far_from_pred = set(
@@ -81,7 +60,7 @@ def advanced_update_agent(agent, predator, prey, estimated_pred_position=None, e
         dist = mp.recursive_search(agent, agent.config["DEPTH"], neighbor, sim_predator,
                                    prey.position if estimated_prey_position is None else estimated_prey_position, set())
 
-        if not dist is None:
+        if dist is not None:
             if dist < min_dist or (dist == min_dist and agent.visited[neighbor] <= agent.visited[min_neighbor]):
                 min_dist = dist
                 min_neighbor = neighbor
@@ -98,8 +77,9 @@ def normalize_probs(vector):
     vector = list(map(lambda x: x / s, vector))
     return vector
 
-def checkProbSum(su):
-    if abs(1 - su) < 0.00000000000001: # 0.000000000000001
+
+def check_prob_sum(su):
+    if abs(1 - su) < 0.00000000000001:  # 0.000000000000001
         return
     print("BELIEF SYSTEM FAULTY: " + str(su))
     exit()

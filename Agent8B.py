@@ -1,10 +1,12 @@
+import random
+
 import MapUtils as mp
 from random import choice
 import numpy as np
 import AgentUtils as au
 
 
-class Agent8:
+class Agent8B:
     def __init__(self, graph, start, config):
         self.position = start
         self.graph = graph
@@ -23,12 +25,6 @@ class Agent8:
         self.found_predator = False
         self.predator_q = [1 / (self.config["GRAPH_SIZE"]) for i in
                            range(self.config["GRAPH_SIZE"])]  # vector containing probabilities of where the prey is
-
-    def checkProbSum(self, su):
-        if abs(1 - su) < 0.000000001:  # 0.000000000000001
-            return
-        print("BELIEF SYSTEM FAULTY")
-        exit()
 
     def belief_system(self, predator, prey):
 
@@ -65,29 +61,41 @@ class Agent8:
 
         max_predator_prob = max(self.predator_q)
         survey_spot = 0
+
+        defective = random.randrange(100) < 10
+
         if max_predator_prob != 1:
             survey_spot = choice([i for i in self.graph.keys() if self.predator_q[i] == max_predator_prob])
         else:
             max_prey_prob = max(self.prey_q)
             survey_spot = choice([i for i in self.graph.keys() if self.prey_q[i] == max_prey_prob])
 
-        if survey_spot == prey.position:
-            self.prey_q = [0 for i in range(self.config["GRAPH_SIZE"])]
-            self.prey_q[survey_spot] = 1
-            self.found_prey = True
-        else:
+        if defective:  # false negative
             old_survey_spot_prob = self.prey_q[survey_spot]
             self.prey_q[survey_spot] = 0
             self.prey_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.prey_q))
-
-        if survey_spot == predator.position:
-            self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])]
-            self.predator_q[survey_spot] = 1
-            self.found_predator = True
-        else:
             old_survey_spot_prob = self.predator_q[survey_spot]
-            self.predator_q[survey_spot] = 0
-            self.predator_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.predator_q))
+            if old_survey_spot_prob != 1:
+                self.predator_q[survey_spot] = 0
+                self.predator_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.predator_q))
+        else:  # otherwise act normally
+            if survey_spot == prey.position:
+                self.prey_q = [0 for i in range(self.config["GRAPH_SIZE"])]
+                self.prey_q[survey_spot] = 1
+                self.found_prey = True
+            else:
+                old_survey_spot_prob = self.prey_q[survey_spot]
+                self.prey_q[survey_spot] = 0
+                self.prey_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.prey_q))
+
+            if survey_spot == predator.position:
+                self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])]
+                self.predator_q[survey_spot] = 1
+                self.found_predator = True
+            else:
+                old_survey_spot_prob = self.predator_q[survey_spot]
+                self.predator_q[survey_spot] = 0
+                self.predator_q = list(map(lambda x: x / (1 - old_survey_spot_prob), self.predator_q))
 
         self.prey_q = au.normalize_probs(self.prey_q)
         au.check_prob_sum(sum(self.prey_q))
