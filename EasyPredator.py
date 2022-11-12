@@ -3,6 +3,7 @@ import MapUtils as mp
 import random
 from collections import deque
 
+
 class Predator:
 
     def __init__(self, graph, config, agent_pos):
@@ -24,7 +25,7 @@ class Predator:
             self.path = deque()
             choices = len(self.graph[self.position])
             for i in range(0, choices):
-                if decision < (i+1)*100:
+                if decision < (i + 1) * 100:
                     self.position = self.graph[self.position][i]
                     break
 

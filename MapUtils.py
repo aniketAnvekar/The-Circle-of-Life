@@ -21,7 +21,7 @@ def get_shortest_distances_to_goals(graph, start, goals):
 
         if cur not in visited:
             neighbors = graph[cur][:]
-            shuffle(neighbors)
+            # shuffle(neighbors)
             for neighbor in neighbors:
                 if neighbor not in visited:
                     queue.put(neighbor)
@@ -40,29 +40,17 @@ def shortest_path_to_goal(graph, start, goal):
     paths = {}
 
     while not queue.empty():
-        # print("Running search...")
         cur = queue.get()
-        # print("Initialized cur...")
-
         if cur == goal:
-            # print("Found Goal...")
             break
-        # print("Checked if is goal...")
         if cur not in visited:
-            # print("Before: " + str(graph[cur]))
-            # graph[cur].sort(key=actually_visited.get)
-            # print("After: " + str(graph[cur]))
             for neighbor in graph[cur]:
-                # print("Cur's neighbors: ", cur, graph[cur])
                 if neighbor not in visited:
-                    # print("Adding neighbor...")
                     queue.put(neighbor)
                     if neighbor not in paths.keys():
                         paths[neighbor] = cur
-                # print("Adding neighbor: ", neighbor, cur)
 
         visited.add(cur)
-    # print("Visited: ", len(visited))
 
     return map_to_stack(paths, goal, start)
 
@@ -71,7 +59,6 @@ def map_to_stack(paths, goal, start):
     stack = deque()
     stack.append(goal)
     cur = goal
-    # print(paths)
     while cur in paths.keys():
         cur = paths[cur]
         if cur == start:

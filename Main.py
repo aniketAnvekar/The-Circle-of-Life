@@ -5,6 +5,7 @@ import Predator as Pr
 import EasyPredator as EPr
 import json
 import random
+import AgentUtils as au
 import Agent1 as A1
 import Agent2 as A2
 import Agent3 as A3
@@ -101,8 +102,8 @@ def trials():
     graph = gr.Graph(config["GRAPH_SIZE"], config)
     graph.create()
     agent_start = random.randrange(0, config["GRAPH_SIZE"])
-    agent = A1.Agent1(graph.alist, agent_start, config)
-    predator = Pr.Predator(graph.alist, config, agent_start)
+    agent = A8C.Agent8C(graph.alist, agent_start, config)
+    predator = EPr.Predator(graph.alist, config, agent_start)
     prey = P.Prey(graph.alist, config, agent_start)
     timeouts = 0
     deaths = 0
@@ -110,24 +111,26 @@ def trials():
     for i in range(config["NUMBER_OF_TRIALS"]):
         if i % 50 == 0:
             print("TRIAL " + str(i))
-        breakFlag = False
+        break_flag = False
         status = 0
         for j in range(config["TIMEOUT"]):
             status = agent.update(predator, prey)
             if status != 0:
-                breakFlag = True
+                break_flag = True
                 break
 
             status = prey.update(agent.position)
             if status != 0:
-                breakFlag = True
+                break_flag = True
                 break
             status = predator.update(agent.position)
             if status != 0:
-                breakFlag = True
+                break_flag = True
                 break
 
-        if breakFlag:
+            au.belief_system_move_pieces(agent)
+
+        if break_flag:
             if status == 1:
                 success = success + 1
             else:
@@ -137,8 +140,8 @@ def trials():
         graph = gr.Graph(config["GRAPH_SIZE"], config)
         graph.create()
         agent_start = random.randrange(0, config["GRAPH_SIZE"])
-        agent = A1.Agent1(graph.alist, agent_start, config)
-        predator = Pr.Predator(graph.alist, config, agent_start)
+        agent = A8C.Agent8C(graph.alist, agent_start, config)
+        predator = EPr.Predator(graph.alist, config, agent_start)
         prey = P.Prey(graph.alist, config, agent_start)
 
     print("Timeouts: " + str(timeouts))
