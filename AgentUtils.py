@@ -141,9 +141,9 @@ def survey_combined(agent, predator, prey):
 
 def survey_partial_pred(agent, predator, survey_spot=None, defective=None):
     survey_spot = pick_most_probable_spot(agent, agent.predator_q) if survey_spot is None else survey_spot
-    agent.total_prey_guess = agent.total_prey_guess + 1
+    agent.total_pred_guess = agent.total_pred_guess + 1
     if survey_spot == predator.position:
-        agent.total_prey_correct = agent.total_prey_correct + 1
+        agent.total_pred_correct = agent.total_pred_correct + 1
         agent.predator_q = [0 for _ in range(agent.config["GRAPH_SIZE"])]
         agent.predator_q[survey_spot] = 1
     else:
@@ -154,9 +154,9 @@ def survey_partial_pred(agent, predator, survey_spot=None, defective=None):
 
 def survey_partial_prey(agent, prey, survey_spot=None, defective=None):
     survey_spot = pick_most_probable_spot(agent, agent.prey_q) if survey_spot is None else survey_spot
-    agent.total_pred_guess = agent.total_pred_guess + 1
+    agent.total_prey_guess = agent.total_prey_guess + 1
     if survey_spot == prey.position:
-        agent.total_pred_correct = agent.total_pred_correct + 1
+        agent.total_prey_correct = agent.total_prey_correct + 1
         agent.prey_q = [0 for _ in range(agent.config["GRAPH_SIZE"])]
         agent.prey_q[survey_spot] = 1
         agent.found_prey = True
