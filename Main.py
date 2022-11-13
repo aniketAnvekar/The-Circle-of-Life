@@ -158,7 +158,7 @@ def trials():
     if total_prey_guess != 0:
         print("Prey Survey Rate: " + str(total_prey_correct) + " correct of " + str(total_prey_guess) + ", " + str(total_prey_correct / total_prey_guess))
     if total_pred_guess != 0:
-        print("Prey Survey Rate: " + str(total_pred_correct) + " correct of " + str(total_pred_guess) + ", " + str(total_pred_correct / total_pred_guess))
+        print("Predator Survey Rate: " + str(total_pred_correct) + " correct of " + str(total_pred_guess) + ", " + str(total_pred_correct / total_pred_guess))
 
 
 trials()
