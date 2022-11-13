@@ -1,7 +1,7 @@
 import AgentUtils as au
 
 
-class Agent7:
+class Agent7C:
 	def __init__(self, graph, start, config):
 		self.position = start
 		self.graph = graph
@@ -36,13 +36,11 @@ class Agent7:
 			self.predator_q[predator.position] = 1
 			self.first_run = False
 
-		estimated_predator_position, estimated_prey_position = au.survey_combined(self, predator, prey)
+		estimated_predator_position, estimated_prey_position = au.survey_defective_drone(self, predator, prey, defective=True)
 
 		ret = au.basic_update_agent(self, predator, prey, estimated_predator_position=estimated_predator_position,
-									 estimated_prey_position=estimated_prey_position)
+									estimated_prey_position=estimated_prey_position)
 		if ret == 0:
 			au.general_move_agent(self)
 
 		return ret
-
-

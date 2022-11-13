@@ -1,10 +1,7 @@
-from random import choice
-
 import AgentUtils as au
-import MapUtils as mp
 
 
-class Agent4:
+class Agent8C:
     def __init__(self, graph, start, config):
         self.position = start
         self.graph = graph
@@ -15,13 +12,13 @@ class Agent4:
         self.total_pred_correct = 0
         self.visited = [0 for _ in self.graph.keys()]
 
-        # initialization
+        # prey initialization
 
         self.prey_q = [1 / (self.config["GRAPH_SIZE"] - 1) for _ in range(self.config["GRAPH_SIZE"])]
         self.prey_q[start] = 0
         self.found_prey = False
 
-        # set up transition matrix
+        # prey set up transition matrix
 
         self.prey_P = [[0 for _ in range(self.config["GRAPH_SIZE"])] for _ in range(self.config["GRAPH_SIZE"])]
         for i in graph.keys():
@@ -29,15 +26,22 @@ class Agent4:
             for j in graph[i]:
                 self.prey_P[i][j] = 1 / (len(self.graph[j]) + 1)
 
-    def update(self, predator, prey):
-        estimated_prey_position = au.survey_partial_prey(self, prey)
-        options = list(filter(lambda x: self.prey_q[x] == self.prey_q[estimated_prey_position], self.graph.keys()))
-        if len(options) != 1:
-            distances = mp.get_shortest_distances_to_goals(self.graph, predator.position, options)
-            longest = max(distances.values())
-            estimated_prey_position = choice([i for i in distances.keys() if distances[i] == longest])
+        # predator initialization
 
-        ret = au.advanced_update_agent(self, predator, prey, estimated_prey_position=estimated_prey_position)
+        self.predator_q = [0 for _ in range(self.config["GRAPH_SIZE"])]
+        self.first_run = True
+
+    def update(self, predator, prey):
+        if self.first_run:
+            # finish initialization...
+            self.predator_q[predator.position] = 1
+            self.first_run = False
+
+        estimated_predator_position, estimated_prey_position = au.survey_defective_drone(self, predator, prey, defective=True)
+
+        ret = au.advanced_update_agent(self, predator, prey, estimated_predator_position=estimated_predator_position,
+                                    estimated_prey_position=estimated_prey_position)
         if ret == 0:
             au.general_move_agent(self)
+
         return ret

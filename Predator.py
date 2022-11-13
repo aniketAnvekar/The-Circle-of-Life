@@ -1,7 +1,8 @@
-import queue as q
-import MapUtils as mp
 import random
 from collections import deque
+
+import MapUtils as mp
+
 
 class Predator:
 
@@ -18,10 +19,8 @@ class Predator:
         self.path = deque()
 
     def update(self, agent_pos):
-        # print("Predator Running...")
         if self.last_agent_pos != agent_pos or len(self.path) == 0:
-            self.path = mp.shortestPathToGoal(self.graph, self.position, agent_pos)
-        # print(self.path, self.position)
+            self.path = mp.shortest_path_to_goal(self.graph, self.position, agent_pos)
         self.position = self.path.pop()
         self.last_agent_pos = agent_pos
 

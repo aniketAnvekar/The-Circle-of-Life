@@ -3,7 +3,7 @@ from random import choice
 import AgentUtils as au
 
 
-class Agent8:
+class Agent8B:
     def __init__(self, graph, start, config):
         self.position = start
         self.graph = graph
@@ -39,7 +39,7 @@ class Agent8:
             self.predator_q[predator.position] = 1
             self.first_run = False
 
-        estimated_predator_position, estimated_prey_position = au.survey_combined(self, predator, prey)
+        estimated_predator_position, estimated_prey_position = au.survey_defective_drone(self, predator, prey)
 
         options = list(filter(lambda x: self.predator_q[x] == self.predator_q[estimated_predator_position], self.graph.keys()))
         if len(options) != 1:
