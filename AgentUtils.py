@@ -120,6 +120,12 @@ def survey_defective_drone(agent, predator, prey, defective=None):
     survey_spot = pick_most_probable_spot(agent, agent.predator_q if max(agent.predator_q) != 1 else agent.prey_q)
     error = random.randrange(100) < 10
     if error:  # false negative
+        agent.total_prey_guess = agent.total_prey_guess + 1
+        agent.total_pred_guess = agent.total_pred_guess + 1
+        if survey_spot == predator.position:
+            agent.total_pred_correct = agent.total_pred_correct + 1
+        if survey_spot == prey.position:
+            agent.total_prey_correct = agent.total_prey_correct + 1
         agent.prey_q = survey_negative_response(agent.prey_q, survey_spot, defective)
         if agent.predator_q[survey_spot] != 1:
             agent.predator_q = survey_negative_response(agent.predator_q, survey_spot, defective)
@@ -135,7 +141,9 @@ def survey_combined(agent, predator, prey):
 
 def survey_partial_pred(agent, predator, survey_spot=None, defective=None):
     survey_spot = pick_most_probable_spot(agent, agent.predator_q) if survey_spot is None else survey_spot
+    agent.total_prey_guess = agent.total_prey_guess + 1
     if survey_spot == predator.position:
+        agent.total_prey_correct = agent.total_prey_correct + 1
         agent.predator_q = [0 for _ in range(agent.config["GRAPH_SIZE"])]
         agent.predator_q[survey_spot] = 1
     else:
@@ -146,7 +154,9 @@ def survey_partial_pred(agent, predator, survey_spot=None, defective=None):
 
 def survey_partial_prey(agent, prey, survey_spot=None, defective=None):
     survey_spot = pick_most_probable_spot(agent, agent.prey_q) if survey_spot is None else survey_spot
+    agent.total_pred_guess = agent.total_pred_guess + 1
     if survey_spot == prey.position:
+        agent.total_pred_correct = agent.total_pred_correct + 1
         agent.prey_q = [0 for _ in range(agent.config["GRAPH_SIZE"])]
         agent.prey_q[survey_spot] = 1
         agent.found_prey = True
@@ -818,28 +828,21 @@ def calculate_transition_probability_matrix(agent):
 # 				self.predator_q[survey_spot] = 0.1*old_survey_spot_prob
 # 				self.predator_q = list(map(lambda x: x / (0.1*old_survey_spot_prob + (1 - old_survey_spot_prob)), self.predator_q))
 #
-# 		else:
-# 			if survey_spot == prey.position:
-# 				# P(prey in X | survey drone scans prey at S) = P(survey drone scans prey at S | prey in X)P(prey in X) / P(survey drone scans prey at S)
-# 				# P(survey drone scans prey at S) = P(survey drone scans prey at S | prey in S)P(prey in S) + P(survey drone scans prey at S | prey not in S)P(prey not in S)
-# 				# P(survey drone scans prey at S | prey in X) = 0 if X != S, 0.9 if X == S
-# 				# if X != S
-# 				# P(prey in X | survey drone scans prey at S) = 0*P(prey in X) / (0.9*P(prey in S) + 0*P(prey not in S)) = 0
-# 				# if X == S
-# 				# P(prey in X | survey drone scans prey at S) =  0.9*P(prey in S) / (0.9*P(prey in S) + 0*P(prey not in S)) = 1
+# else: if survey_spot == prey.position: # P(prey in X | survey drone scans prey at S) = P(survey drone scans prey at
+# S | prey in X)P(prey in X) / P(survey drone scans prey at S) # P(survey drone scans prey at S) = P(survey drone
+# scans prey at S | prey in S)P(prey in S) + P(survey drone scans prey at S | prey not in S)P(prey not in S) # P(
+# survey drone scans prey at S | prey in X) = 0 if X != S, 0.9 if X == S # if X != S # P(prey in X | survey drone
+# scans prey at S) = 0*P(prey in X) / (0.9*P(prey in S) + 0*P(prey not in S)) = 0 # if X == S # P(prey in X | survey
+# drone scans prey at S) =  0.9*P(prey in S) / (0.9*P(prey in S) + 0*P(prey not in S)) = 1
 #
-# 				self.prey_q = [0 for i in range(self.config["GRAPH_SIZE"])]
-# 				self.prey_q[survey_spot] = 1
-# 				self.found_prey = True
-# 			else:
-# 				# P(prey in X | survey drone doesn't scan prey at S) = P(survey drone doesn't scan prey at S | prey in X)P(prey in X) / P(survey drone doesn't scan prey at S)
-# 				# P(survey drone doesn't scan prey at S | prey in X) = 1 if X != S, 0.1 if X == S
-# 				# P(survey drone doesn't scan prey at S) = P(survey drone doesn't scan prey at S | prey in S)P(prey in S) + P(survey drone doesn't scan prey at S | prey not in S)P(prey not in S)
-# 				# = 0.1*P(prey in S) + 1*P(prey not in S)
-# 				# for X != S
-# 				# P(prey in X | survey drone doesn't scan prey at S) = 1*P(prey in X) / (0.1*P(prey in S) + 1*P(prey not in S))
-# 				# for X == S
-# 				# P(prey in X | survey drone doesn't scan prey at S) = 0.1*P(prey in S) / (0.1*P(prey in S) + 1*P(prey not in S))
+# self.prey_q = [0 for i in range(self.config["GRAPH_SIZE"])] self.prey_q[survey_spot] = 1 self.found_prey = True
+# else: # P(prey in X | survey drone doesn't scan prey at S) = P(survey drone doesn't scan prey at S | prey in X)P(
+# prey in X) / P(survey drone doesn't scan prey at S) # P(survey drone doesn't scan prey at S | prey in X) = 1 if X
+# != S, 0.1 if X == S # P(survey drone doesn't scan prey at S) = P(survey drone doesn't scan prey at S | prey in S)P(
+# prey in S) + P(survey drone doesn't scan prey at S | prey not in S)P(prey not in S) # = 0.1*P(prey in S) + 1*P(prey
+# not in S) # for X != S # P(prey in X | survey drone doesn't scan prey at S) = 1*P(prey in X) / (0.1*P(prey in S) +
+# 1*P(prey not in S)) # for X == S # P(prey in X | survey drone doesn't scan prey at S) = 0.1*P(prey in S) / (0.1*P(
+# prey in S) + 1*P(prey not in S))
 #
 # 				old_survey_spot_prob = self.prey_q[survey_spot]
 # 				self.prey_q[survey_spot] = 0.1*old_survey_spot_prob
@@ -847,31 +850,22 @@ def calculate_transition_probability_matrix(agent):
 #
 # 				# print("Survey Spot: " + str(survey_spot))
 #
-# 			if survey_spot == predator.position:
-# 				# P(pred in X | survey drone scans pred at S) = P(survey drone scans pred at S | pred in X)P(pred in X) / P(survey drone scans pred at S)
-# 				# P(survey drone scans pred at S) = P(survey drone scans pred at S | pred in S)P(pred in S) + P(survey drone scans pred at S | pred not in S)P(pred not in S)
-# 				# P(survey drone scans pred at S | pred in X) = 0 if X != S, 0.9 if X == S
-# 				# if X != S
-# 				# P(pred in X | survey drone scans pred at S) = 0*P(pred in X) / (0.9*P(pred in S) + 0*P(pred not in S)) = 0
-# 				# if X == S
-# 				# P(pred in X | survey drone scans pred at S) =  0.9*P(pred in S) / (0.9*P(pred in S) + 0*P(pred not in S)) = 1
-# 				old_survey_spot_prob = self.predator_q[survey_spot]
-# 				self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])]
-# 				self.predator_q[survey_spot] = 1
-# 				self.found_predator = True
-# 				# print("Predator Found!")
-# 			else:
-# 				# P(pred in X | survey drone doesn't scan pred at S) = P(survey drone doesn't scan pred at S | pred in X)P(pred in X) / P(survey drone doesn't scan pred at S)
-# 				# P(survey drone doesn't scan pred at S | pred in X) = 1 if X != S, 0.1 if X == S
-# 				# P(survey drone doesn't scan pred at S) = P(survey drone doesn't scan pred at S | pred in S)P(pred in S) + P(survey drone doesn't scan pred at S | pred not in S)P(pred not in S)
-# 				# = 0.1*P(pred in S) + 1*P(pred not in S)
-# 				# for X != S
-# 				# P(pred in X | survey drone doesn't scan pred at S) = 1*P(pred in X) / (0.1*P(pred in S) + 1*P(pred not in S))
-# 				# for X == S
-# 				# P(pred in X | survey drone doesn't scan pred at S) = 0.1*P(pred in S) / (0.1*P(pred in S) + 1*P(pred not in S))
-# 				old_survey_spot_prob = self.predator_q[survey_spot]
-# 				self.predator_q[survey_spot] = 0.1*old_survey_spot_prob
-# 				self.predator_q = list(map(lambda x: x / (0.1*old_survey_spot_prob + (1 - old_survey_spot_prob)), self.predator_q))
+# if survey_spot == predator.position: # P(pred in X | survey drone scans pred at S) = P(survey drone scans pred at S
+# | pred in X)P(pred in X) / P(survey drone scans pred at S) # P(survey drone scans pred at S) = P(survey drone scans
+# pred at S | pred in S)P(pred in S) + P(survey drone scans pred at S | pred not in S)P(pred not in S) # P(survey
+# drone scans pred at S | pred in X) = 0 if X != S, 0.9 if X == S # if X != S # P(pred in X | survey drone scans pred
+# at S) = 0*P(pred in X) / (0.9*P(pred in S) + 0*P(pred not in S)) = 0 # if X == S # P(pred in X | survey drone scans
+# pred at S) =  0.9*P(pred in S) / (0.9*P(pred in S) + 0*P(pred not in S)) = 1 old_survey_spot_prob =
+# self.predator_q[survey_spot] self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])] self.predator_q[
+# survey_spot] = 1 self.found_predator = True # print("Predator Found!") else: # P(pred in X | survey drone doesn't
+# scan pred at S) = P(survey drone doesn't scan pred at S | pred in X)P(pred in X) / P(survey drone doesn't scan pred
+# at S) # P(survey drone doesn't scan pred at S | pred in X) = 1 if X != S, 0.1 if X == S # P(survey drone doesn't
+# scan pred at S) = P(survey drone doesn't scan pred at S | pred in S)P(pred in S) + P(survey drone doesn't scan pred
+# at S | pred not in S)P(pred not in S) # = 0.1*P(pred in S) + 1*P(pred not in S) # for X != S # P(pred in X | survey
+# drone doesn't scan pred at S) = 1*P(pred in X) / (0.1*P(pred in S) + 1*P(pred not in S)) # for X == S # P(pred in X
+# | survey drone doesn't scan pred at S) = 0.1*P(pred in S) / (0.1*P(pred in S) + 1*P(pred not in S))
+# old_survey_spot_prob = self.predator_q[survey_spot] self.predator_q[survey_spot] = 0.1*old_survey_spot_prob
+# self.predator_q = list(map(lambda x: x / (0.1*old_survey_spot_prob + (1 - old_survey_spot_prob)), self.predator_q))
 #
 # 		self.prey_q = au.normalize_probs(self.prey_q)
 # 		au.check_prob_sum(sum(self.prey_q))
@@ -939,14 +933,11 @@ def calculate_transition_probability_matrix(agent):
 #             max_prey_prob = max(self.prey_q)
 #             survey_spot = choice([i for i in self.graph.keys() if self.prey_q[i] == max_prey_prob])
 #
-#         if defective:
-#             old_survey_spot_prob = self.prey_q[survey_spot]
-#             self.prey_q[survey_spot] = 0.1*old_survey_spot_prob
-#             self.prey_q = list(map(lambda x: x / (0.1*old_survey_spot_prob + (1 - old_survey_spot_prob)), self.prey_q))
-#             old_survey_spot_prob = self.predator_q[survey_spot]
-#             if old_survey_spot_prob != 1:
-#                 self.predator_q[survey_spot] = 0.1*old_survey_spot_prob
-#                 self.predator_q = list(map(lambda x: x / (0.1*old_survey_spot_prob + (1 - old_survey_spot_prob)), self.predator_q))
+# if defective: old_survey_spot_prob = self.prey_q[survey_spot] self.prey_q[survey_spot] = 0.1*old_survey_spot_prob
+# self.prey_q = list(map(lambda x: x / (0.1*old_survey_spot_prob + (1 - old_survey_spot_prob)), self.prey_q))
+# old_survey_spot_prob = self.predator_q[survey_spot] if old_survey_spot_prob != 1: self.predator_q[survey_spot] =
+# 0.1*old_survey_spot_prob self.predator_q = list(map(lambda x: x / (0.1*old_survey_spot_prob + (1 -
+# old_survey_spot_prob)), self.predator_q))
 #
 #         else:
 #             if survey_spot == prey.position:
@@ -977,31 +968,22 @@ def calculate_transition_probability_matrix(agent):
 #
 #             # print("Survey Spot: " + str(survey_spot))
 #
-#             if survey_spot == predator.position:
-#                 # P(pred in X | survey drone scans pred at S) = P(survey drone scans pred at S | pred in X)P(pred in X) / P(survey drone scans pred at S)
-#                 # P(survey drone scans pred at S) = P(survey drone scans pred at S | pred in S)P(pred in S) + P(survey drone scans pred at S | pred not in S)P(pred not in S)
-#                 # P(survey drone scans pred at S | pred in X) = 0 if X != S, 0.9 if X == S
-#                 # if X != S
-#                 # P(pred in X | survey drone scans pred at S) = 0*P(pred in X) / (0.9*P(pred in S) + 0*P(pred not in S)) = 0
-#                 # if X == S
-#                 # P(pred in X | survey drone scans pred at S) =  0.9*P(pred in S) / (0.9*P(pred in S) + 0*P(pred not in S)) = 1
-#                 old_survey_spot_prob = self.predator_q[survey_spot]
-#                 self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])]
-#                 self.predator_q[survey_spot] = 1
-#                 self.found_predator = True
-#             # print("Predator Found!")
-#             else:
-#                 # P(pred in X | survey drone doesn't scan pred at S) = P(survey drone doesn't scan pred at S | pred in X)P(pred in X) / P(survey drone doesn't scan pred at S)
-#                 # P(survey drone doesn't scan pred at S | pred in X) = 1 if X != S, 0.1 if X == S
-#                 # P(survey drone doesn't scan pred at S) = P(survey drone doesn't scan pred at S | pred in S)P(pred in S) + P(survey drone doesn't scan pred at S | pred not in S)P(pred not in S)
-#                 # = 0.1*P(pred in S) + 1*P(pred not in S)
-#                 # for X != S
-#                 # P(pred in X | survey drone doesn't scan pred at S) = 1*P(pred in X) / (0.1*P(pred in S) + 1*P(pred not in S))
-#                 # for X == S
-#                 # P(pred in X | survey drone doesn't scan pred at S) = 0.1*P(pred in S) / (0.1*P(pred in S) + 1*P(pred not in S))
-#                 old_survey_spot_prob = self.predator_q[survey_spot]
-#                 self.predator_q[survey_spot] = 0.1*old_survey_spot_prob
-#                 self.predator_q = list(map(lambda x: x / (0.1*old_survey_spot_prob + (1 - old_survey_spot_prob)), self.predator_q))
+# if survey_spot == predator.position: # P(pred in X | survey drone scans pred at S) = P(survey drone scans pred at S
+# | pred in X)P(pred in X) / P(survey drone scans pred at S) # P(survey drone scans pred at S) = P(survey drone scans
+# pred at S | pred in S)P(pred in S) + P(survey drone scans pred at S | pred not in S)P(pred not in S) # P(survey
+# drone scans pred at S | pred in X) = 0 if X != S, 0.9 if X == S # if X != S # P(pred in X | survey drone scans pred
+# at S) = 0*P(pred in X) / (0.9*P(pred in S) + 0*P(pred not in S)) = 0 # if X == S # P(pred in X | survey drone scans
+# pred at S) =  0.9*P(pred in S) / (0.9*P(pred in S) + 0*P(pred not in S)) = 1 old_survey_spot_prob =
+# self.predator_q[survey_spot] self.predator_q = [0 for i in range(self.config["GRAPH_SIZE"])] self.predator_q[
+# survey_spot] = 1 self.found_predator = True # print("Predator Found!") else: # P(pred in X | survey drone doesn't
+# scan pred at S) = P(survey drone doesn't scan pred at S | pred in X)P(pred in X) / P(survey drone doesn't scan pred
+# at S) # P(survey drone doesn't scan pred at S | pred in X) = 1 if X != S, 0.1 if X == S # P(survey drone doesn't
+# scan pred at S) = P(survey drone doesn't scan pred at S | pred in S)P(pred in S) + P(survey drone doesn't scan pred
+# at S | pred not in S)P(pred not in S) # = 0.1*P(pred in S) + 1*P(pred not in S) # for X != S # P(pred in X | survey
+# drone doesn't scan pred at S) = 1*P(pred in X) / (0.1*P(pred in S) + 1*P(pred not in S)) # for X == S # P(pred in X
+# | survey drone doesn't scan pred at S) = 0.1*P(pred in S) / (0.1*P(pred in S) + 1*P(pred not in S))
+# old_survey_spot_prob = self.predator_q[survey_spot] self.predator_q[survey_spot] = 0.1*old_survey_spot_prob
+# self.predator_q = list(map(lambda x: x / (0.1*old_survey_spot_prob + (1 - old_survey_spot_prob)), self.predator_q))
 #
 #         self.prey_q = au.normalize_probs(self.prey_q)
 #         au.check_prob_sum(sum(self.prey_q))

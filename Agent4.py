@@ -9,6 +9,10 @@ class Agent4:
         self.position = start
         self.graph = graph
         self.config = config
+        self.total_prey_guess = 0
+        self.total_prey_correct = 0
+        self.total_pred_guess = 0
+        self.total_pred_correct = 0
         self.visited = [0 for _ in self.graph.keys()]
 
         # initialization

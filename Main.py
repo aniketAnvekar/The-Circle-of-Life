@@ -102,12 +102,16 @@ def trials():
     graph = gr.Graph(config["GRAPH_SIZE"], config)
     graph.create()
     agent_start = random.randrange(0, config["GRAPH_SIZE"])
-    agent = A8C.Agent8C(graph.alist, agent_start, config)
-    predator = EPr.Predator(graph.alist, config, agent_start)
+    agent = A3.Agent3(graph.alist, agent_start, config)
+    predator = Pr.Predator(graph.alist, config, agent_start)
     prey = P.Prey(graph.alist, config, agent_start)
     timeouts = 0
     deaths = 0
     success = 0
+    total_prey_guess = 0
+    total_pred_guess = 0
+    total_prey_correct = 0
+    total_pred_correct = 0
     for i in range(config["NUMBER_OF_TRIALS"]):
         if i % 50 == 0:
             print("TRIAL " + str(i))
@@ -139,14 +143,22 @@ def trials():
             timeouts = timeouts + 1
         graph = gr.Graph(config["GRAPH_SIZE"], config)
         graph.create()
+        total_prey_guess = agent.total_prey_guess + total_prey_guess
+        total_pred_guess = agent.total_pred_guess + total_pred_guess
+        total_prey_correct = agent.total_prey_correct + total_prey_correct
+        total_pred_correct = agent.total_pred_correct + total_pred_correct
         agent_start = random.randrange(0, config["GRAPH_SIZE"])
-        agent = A8C.Agent8C(graph.alist, agent_start, config)
-        predator = EPr.Predator(graph.alist, config, agent_start)
+        agent = A3.Agent3(graph.alist, agent_start, config)
+        predator = Pr.Predator(graph.alist, config, agent_start)
         prey = P.Prey(graph.alist, config, agent_start)
 
-    print("Timeouts: " + str(timeouts))
-    print("Deaths: " + str(deaths))
-    print("Success: " + str(success))
+    print("Timeouts: " + str(timeouts) + ", " + str(timeouts/(timeouts + deaths + success)))
+    print("Deaths: " + str(deaths) + ", " + str(deaths/(timeouts + deaths + success)))
+    print("Wins: " + str(success) + ", " + str(success/(timeouts + deaths + success)))
+    if total_prey_guess != 0:
+        print("Prey Survey Rate: " + str(total_prey_correct) + " correct of " + str(total_prey_guess) + ", " + str(total_prey_correct / total_prey_guess))
+    if total_pred_guess != 0:
+        print("Prey Survey Rate: " + str(total_pred_correct) + " correct of " + str(total_pred_guess) + ", " + str(total_pred_correct / total_pred_guess))
 
 
 trials()

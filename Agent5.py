@@ -1,6 +1,3 @@
-import MapUtils as mp
-from random import choice
-import numpy as np
 import AgentUtils as au
 
 
@@ -10,7 +7,10 @@ class Agent5:
         self.position = start
         self.graph = graph
         self.config = config
-
+        self.total_pred_guess = 0
+        self.total_pred_correct = 0
+        self.total_prey_guess = 0
+        self.total_prey_correct = 0
         # initialization
 
         self.predator_q = [0 for _ in range(self.config["GRAPH_SIZE"])]
