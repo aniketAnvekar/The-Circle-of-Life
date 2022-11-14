@@ -18,6 +18,9 @@ import Agent7C as A7C
 import Agent8 as A8
 import Agent8B as A8B
 import Agent8C as A8C
+import Agent10A as A10A
+import Agent10B as A10B
+
 
 
 def load_config():
@@ -41,7 +44,7 @@ def init():
 
     # setting up players
     agent_start = random.randrange(0, config["GRAPH_SIZE"])
-    agent = A2.Agent2(graph.alist, agent_start, config)
+    agent = A10A.Agent10A(graph.alist, agent_start, config)
     predator = Pr.Predator(graph.alist, config, agent_start)
     prey = P.Prey(graph.alist, config, agent_start)
 
@@ -80,8 +83,8 @@ def update(frame, canvas, config, networkx_graph, fig, axis, node_positions, xli
     elif status == -1:
         print("Predator Win...")
         return
-
-    input()
+    au.belief_system_move_pieces(agent)
+    # input()
 
     # redraw the graph
     p.draw_next_graph(canvas, networkx_graph, axis, node_positions, xlim, ylim, predator, prey, agent)
@@ -102,7 +105,7 @@ def trials():
     graph = gr.Graph(config["GRAPH_SIZE"], config)
     graph.create()
     agent_start = random.randrange(0, config["GRAPH_SIZE"])
-    agent = A3.Agent3(graph.alist, agent_start, config)
+    agent = A10A.Agent10A(graph.alist, agent_start, config)
     predator = Pr.Predator(graph.alist, config, agent_start)
     prey = P.Prey(graph.alist, config, agent_start)
     timeouts = 0
