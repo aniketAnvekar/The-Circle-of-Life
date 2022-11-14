@@ -115,45 +115,47 @@ def trials():
     total_pred_guess = 0
     total_prey_correct = 0
     total_pred_correct = 0
-    for i in range(config["NUMBER_OF_TRIALS"]):
-        if i % 50 == 0:
-            print("TRIAL " + str(i))
-        break_flag = False
-        status = 0
-        for j in range(config["TIMEOUT"]):
-            status = agent.update(predator, prey)
-            if status != 0:
-                break_flag = True
-                break
+    for i in range(config["NUMBER_OF_GRAPHS"]):
+        print("GRAPH " + str(i))
+        for k in range(config["TRIALS_PER_GRAPH"]):
+            break_flag = False
+            status = 0
+            for j in range(config["TIMEOUT"]):
+                status = agent.update(predator, prey)
+                if status != 0:
+                    break_flag = True
+                    break
 
-            status = prey.update(agent.position)
-            if status != 0:
-                break_flag = True
-                break
-            status = predator.update(agent.position)
-            if status != 0:
-                break_flag = True
-                break
+                status = prey.update(agent.position)
+                if status != 0:
+                    break_flag = True
+                    break
+                status = predator.update(agent.position)
+                if status != 0:
+                    break_flag = True
+                    break
 
-            au.belief_system_move_pieces(agent)
+                au.belief_system_move_pieces(agent)
 
-        if break_flag:
-            if status == 1:
-                success = success + 1
+            if break_flag:
+                if status == 1:
+                    success = success + 1
+                else:
+                    deaths = deaths + 1
             else:
-                deaths = deaths + 1
-        else:
-            timeouts = timeouts + 1
+                timeouts = timeouts + 1
+
+            total_prey_guess = agent.total_prey_guess + total_prey_guess
+            total_pred_guess = agent.total_pred_guess + total_pred_guess
+            total_prey_correct = agent.total_prey_correct + total_prey_correct
+            total_pred_correct = agent.total_pred_correct + total_pred_correct
+            agent_start = random.randrange(0, config["GRAPH_SIZE"])
+            agent = A3.Agent3(graph.alist, agent_start, config)
+            predator = Pr.Predator(graph.alist, config, agent_start)
+            prey = P.Prey(graph.alist, config, agent_start)
+
         graph = gr.Graph(config["GRAPH_SIZE"], config)
         graph.create()
-        total_prey_guess = agent.total_prey_guess + total_prey_guess
-        total_pred_guess = agent.total_pred_guess + total_pred_guess
-        total_prey_correct = agent.total_prey_correct + total_prey_correct
-        total_pred_correct = agent.total_pred_correct + total_pred_correct
-        agent_start = random.randrange(0, config["GRAPH_SIZE"])
-        agent = A10A.Agent10A(graph.alist, agent_start, config)
-        predator = Pr.Predator(graph.alist, config, agent_start)
-        prey = P.Prey(graph.alist, config, agent_start)
 
     print("Timeouts: " + str(timeouts) + ", " + str(timeouts/(timeouts + deaths + success)))
     print("Deaths: " + str(deaths) + ", " + str(deaths/(timeouts + deaths + success)))
