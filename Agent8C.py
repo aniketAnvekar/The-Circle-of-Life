@@ -1,4 +1,7 @@
+from random import choice
+
 import AgentUtils as au
+import MapUtils as mp
 
 
 class Agent8C:
@@ -38,6 +41,18 @@ class Agent8C:
             self.first_run = False
 
         estimated_predator_position, estimated_prey_position = au.survey_defective_drone(self, predator, prey, defective=True)
+
+        options = list(filter(lambda x: self.predator_q[x] == self.predator_q[estimated_predator_position], self.graph.keys()))
+        if len(options) != 1:
+            distances = mp.get_shortest_distances_to_goals(self.graph, self.position, options)
+            shortest = min(distances.values())
+            estimated_predator_position = choice([i for i in distances.keys() if distances[i] == shortest])
+
+        options = list(filter(lambda x: self.prey_q[x] == self.prey_q[estimated_prey_position], self.graph.keys()))
+        if len(options) != 1:
+            distances = mp.get_shortest_distances_to_goals(self.graph, estimated_predator_position, options)
+            longest = max(distances.values())
+            estimated_prey_position = choice([i for i in distances.keys() if distances[i] == longest])
 
         ret = au.advanced_update_agent(self, predator, prey, estimated_predator_position=estimated_predator_position,
                                     estimated_prey_position=estimated_prey_position)

@@ -104,10 +104,6 @@ def trials():
     config = load_config()
     graph = gr.Graph(config["GRAPH_SIZE"], config)
     graph.create()
-    agent_start = random.randrange(0, config["GRAPH_SIZE"])
-    agent = A10A.Agent10A(graph.alist, agent_start, config)
-    predator = Pr.Predator(graph.alist, config, agent_start)
-    prey = P.Prey(graph.alist, config, agent_start)
     timeouts = 0
     deaths = 0
     success = 0
@@ -117,6 +113,10 @@ def trials():
     total_pred_correct = 0
     for i in range(config["NUMBER_OF_GRAPHS"]):
         print("GRAPH " + str(i))
+        agent_start = random.randrange(0, config["GRAPH_SIZE"])
+        agent = A10B.Agent10B(graph.alist, agent_start, config)
+        predator = EPr.Predator(graph.alist, config, agent_start)
+        prey = P.Prey(graph.alist, config, agent_start)
         for k in range(config["TRIALS_PER_GRAPH"]):
             break_flag = False
             status = 0
@@ -150,8 +150,8 @@ def trials():
             total_prey_correct = agent.total_prey_correct + total_prey_correct
             total_pred_correct = agent.total_pred_correct + total_pred_correct
             agent_start = random.randrange(0, config["GRAPH_SIZE"])
-            agent = A3.Agent3(graph.alist, agent_start, config)
-            predator = Pr.Predator(graph.alist, config, agent_start)
+            agent = A10B.Agent10B(graph.alist, agent_start, config)
+            predator = EPr.Predator(graph.alist, config, agent_start)
             prey = P.Prey(graph.alist, config, agent_start)
 
         graph = gr.Graph(config["GRAPH_SIZE"], config)

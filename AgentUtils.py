@@ -17,10 +17,10 @@ import Agent3
 import Agent4
 import Agent5
 import Agent6
-
+import Agent10B
 
 prey_type = (Agent3.Agent3, Agent4.Agent4, Agent7.Agent7, Agent8.Agent8, Agent7B.Agent7B, Agent8B.Agent8B, Agent7C.Agent7C, Agent8C.Agent8C, Agent10A.Agent10A)
-pred_type = (Agent5.Agent5, Agent6.Agent6, Agent7.Agent7, Agent8.Agent8, Agent7B.Agent7B, Agent8B.Agent8B, Agent7C.Agent7C, Agent8C.Agent8C)
+pred_type = (Agent5.Agent5, Agent6.Agent6, Agent7.Agent7, Agent8.Agent8, Agent7B.Agent7B, Agent8B.Agent8B, Agent7C.Agent7C, Agent8C.Agent8C, Agent10B.Agent10B)
 
 
 def basic_update_agent(agent, predator, prey, estimated_predator_position=None, estimated_prey_position=None):

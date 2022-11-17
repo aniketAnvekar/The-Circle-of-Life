@@ -53,8 +53,8 @@ class Agent8B:
             longest = max(distances.values())
             estimated_prey_position = choice([i for i in distances.keys() if distances[i] == longest])
 
-        ret = au.basic_update_agent(self, predator, prey, estimated_predator_position=estimated_predator_position,
-                                    estimated_prey_position=estimated_prey_position)
+        ret = au.advanced_update_agent(self, predator, prey, estimated_predator_position=estimated_predator_position,
+                                       estimated_prey_position=estimated_prey_position)
         if ret == 0:
             au.general_move_agent(self)
 
